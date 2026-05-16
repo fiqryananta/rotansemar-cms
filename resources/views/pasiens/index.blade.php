@@ -1,4 +1,6 @@
-@php($title = 'Pasien')
+@php
+    $title = 'Pasien';
+@endphp
 @extends('layouts.admin-blade')
 
 @section('content')
@@ -6,10 +8,7 @@
         <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
             <div class="mb-8 flex items-start gap-4">
                 <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-cyan-50 text-cyan-600">
-                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M20 21a8 8 0 1 0-16 0"></path>
-                        <circle cx="12" cy="7" r="4"></circle>
-                    </svg>
+                    <i class="ti ti-users" style="font-size:1.5rem;" aria-hidden="true"></i>
                 </div>
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900">Pasien</h1>
@@ -20,10 +19,7 @@
                 <div class="border-b border-gray-200 p-6">
                     <form id="filter-form" method="GET" action="{{ route('pasiens.index') }}" class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div class="relative flex-1 sm:max-w-xs">
-                            <svg class="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                <circle cx="11" cy="11" r="8"></circle>
-                                <path d="m21 21-4.3-4.3"></path>
-                            </svg>
+                            <i class="ti ti-search pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-gray-400" style="font-size:1rem;" aria-hidden="true"></i>
                             <input id="search" name="search" type="text" value="{{ $filters['search'] ?? '' }}" placeholder="Cari Pasien" class="h-10 w-full rounded-md border border-gray-300 pl-10 pr-3 text-sm focus:border-cyan-500 focus:outline-none" />
                         </div>
 
@@ -35,8 +31,8 @@
                                 @endforeach
                             </select>
                             <button type="submit" class="inline-flex h-10 items-center rounded-md bg-cyan-600 px-4 text-sm font-medium text-white transition hover:bg-cyan-700">Cari</button>
-                            @if (auth()->user()?->hasRole('admin'))
-                                <a href="{{ route('pasiens.import.index') }}" class="inline-flex h-10 items-center rounded-md border border-cyan-300 bg-cyan-50 px-4 text-sm font-medium text-cyan-700 transition hover:bg-cyan-100">Import Pasien</a>
+                            @if (auth()->user()?->hasRole('Admin'))
+                                <a href="{{ route('pasiens.import.index') }}" class="inline-flex h-10 items-center rounded-md border border-yellow-300 bg-yellow-50 px-4 text-sm font-medium text-yellow-700 transition hover:bg-yellow-100">Import Pasien</a>
                             @endif
                             <a href="{{ route('pasiens.create') }}" class="inline-flex h-10 items-center rounded-md bg-gray-900 px-4 text-sm font-medium text-white transition hover:bg-gray-800">Tambah Pasien</a>
                         </div>
@@ -69,6 +65,11 @@
                                             <div class="flex justify-end gap-2">
                                                 <a href="{{ route('pasiens.show', $item->id) }}" class="inline-flex h-9 items-center rounded-md border border-gray-300 bg-white px-3 text-sm font-medium text-gray-700 transition hover:bg-gray-50">Detail</a>
                                                 <a href="{{ route('pasiens.edit', $item->id) }}" class="inline-flex h-9 items-center rounded-md border border-gray-300 bg-white px-3 text-sm font-medium text-gray-700 transition hover:bg-gray-50">Edit</a>
+                                                <form method="POST" action="{{ route('pasiens.destroy', $item->id) }}" data-confirm="Hapus pasien {{ $item->name }}? Data yang dihapus tidak dapat dikembalikan.">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="inline-flex h-9 items-center rounded-md border border-red-200 bg-white px-3 text-sm font-medium text-red-600 transition hover:bg-red-50">Hapus</button>
+                                                </form>
                                             </div>
                                         </td>
                                     </tr>

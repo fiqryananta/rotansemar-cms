@@ -1,15 +1,14 @@
-@php($title = 'Edit Kegiatan Penyuluhan')
+@php
+    $title = 'Edit Kegiatan Penyuluhan';
+@endphp
 @extends('layouts.admin-blade')
 
 @section('content')
     <div class="rounded-2xl border border-gray-200/70 bg-gray-50 shadow-sm">
-        <div class="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
             <div class="mb-8 flex items-start gap-4">
                 <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-cyan-50 text-cyan-600">
-                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M3 11l18-6v14L3 13z"></path>
-                        <path d="M9 15v4"></path>
-                    </svg>
+                    <i class="ti ti-presentation" style="font-size:1.5rem;" aria-hidden="true"></i>
                 </div>
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900">Edit Kegiatan Penyuluhan</h1>
@@ -22,7 +21,7 @@
                 @method('PATCH')
 
                 @foreach (($kegiatanPenyuluhan->foto_kegiatan ?? []) as $photo)
-                    <input type="hidden" name="existing_foto_kegiatan[]" value="{{ $photo }}" />
+                    <input type="hidden" name="existing_foto_kegiatan[]" value="{{ $photo }}" id="ep-{{ $loop->index }}" />
                 @endforeach
 
                 <div class="grid gap-4 md:grid-cols-2">
@@ -37,11 +36,6 @@
                         @error('tanggal_kegiatan')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700" for="lokasi_kegiatan">Lokasi Kegiatan</label>
-                        <input id="lokasi_kegiatan" name="lokasi_kegiatan" value="{{ old('lokasi_kegiatan', $kegiatanPenyuluhan->lokasi_kegiatan) }}" class="mt-1 h-10 w-full rounded-md border border-gray-300 bg-white px-3 text-sm" />
-                        @error('lokasi_kegiatan')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
-                    </div>
-                    <div>
                         <label class="block text-sm font-medium text-gray-700" for="sasaran">Sasaran</label>
                         <input id="sasaran" name="sasaran" value="{{ old('sasaran', $kegiatanPenyuluhan->sasaran) }}" class="mt-1 h-10 w-full rounded-md border border-gray-300 bg-white px-3 text-sm" />
                         @error('sasaran')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
@@ -50,6 +44,11 @@
                         <label class="block text-sm font-medium text-gray-700" for="jumlah_sasaran">Jumlah Sasaran</label>
                         <input id="jumlah_sasaran" name="jumlah_sasaran" type="number" min="1" value="{{ old('jumlah_sasaran', $kegiatanPenyuluhan->jumlah_sasaran) }}" class="mt-1 h-10 w-full rounded-md border border-gray-300 bg-white px-3 text-sm" />
                         @error('jumlah_sasaran')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700" for="lokasi_kegiatan">Lokasi Kegiatan</label>
+                        <input id="lokasi_kegiatan" name="lokasi_kegiatan" value="{{ old('lokasi_kegiatan', $kegiatanPenyuluhan->lokasi_kegiatan) }}" class="mt-1 h-10 w-full rounded-md border border-gray-300 bg-white px-3 text-sm" />
+                        @error('lokasi_kegiatan')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700" for="koordinat_lokasi">Koordinat Lokasi</label>
@@ -66,21 +65,32 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Foto Kegiatan Saat Ini</label>
-                    <div class="mt-2 flex flex-wrap gap-2">
-                        @foreach (($kegiatanPenyuluhan->foto_kegiatan ?? []) as $photo)
-                            <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-700">{{ $photo }}</span>
-                        @endforeach
-                        @if (empty($kegiatanPenyuluhan->foto_kegiatan))
-                            <p class="text-sm text-gray-500">Belum ada foto tersimpan.</p>
-                        @endif
-                    </div>
+                    <label class="block text-sm font-medium text-gray-700">Foto Tersimpan</label>
+                    @if (empty($kegiatanPenyuluhan->foto_kegiatan))
+                        <p class="mt-2 text-sm text-gray-400">Belum ada foto tersimpan.</p>
+                    @else
+                        <div class="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
+                            @foreach (($kegiatanPenyuluhan->foto_kegiatan ?? []) as $photo)
+                                <div class="relative aspect-square overflow-hidden rounded-xl border border-gray-200 bg-gray-50" data-ep-wrap="{{ $loop->index }}">
+                                    <img src="{{ asset('storage/' . $photo) }}" class="h-full w-full object-cover" alt="Foto kegiatan" />
+                                    <button type="button" data-remove-ep="{{ $loop->index }}" class="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-sm font-bold text-white shadow transition hover:bg-red-600" title="Hapus foto ini">&times;</button>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700" for="foto_kegiatan">Tambah Foto Kegiatan</label>
-                    <input id="foto_kegiatan" name="foto_kegiatan[]" type="file" accept="image/jpeg,image/png,image/webp" multiple class="mt-1 block w-full text-sm" />
-                    <p class="mt-1 text-xs text-gray-500">Foto baru akan ditambahkan, foto lama tetap dipakai.</p>
+                    <label class="block text-sm font-medium text-gray-700">Tambah Foto Baru</label>
+                    <div id="fk-zone" class="mt-2 flex min-h-[96px] w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 px-4 py-5 text-center transition hover:border-cyan-400 hover:bg-cyan-50">
+                        <div id="fk-placeholder">
+                            <i class="ti ti-upload mx-auto text-gray-400" style="font-size:2rem;" aria-hidden="true"></i>
+                            <p class="mt-2 text-sm text-gray-600"><span class="font-semibold text-cyan-600">Klik untuk memilih</span> atau seret foto ke sini</p>
+                            <p class="mt-1 text-xs text-gray-400">JPG, PNG, WEBP &middot; Foto baru ditambahkan ke yang sudah ada</p>
+                        </div>
+                        <input id="foto_kegiatan" name="foto_kegiatan[]" type="file" accept="image/jpeg,image/png,image/webp" multiple class="hidden" />
+                    </div>
+                    <div id="fk-preview" class="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5" style="display:none"></div>
                     @error('foto_kegiatan')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                     @error('foto_kegiatan.*')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                 </div>
@@ -92,4 +102,87 @@
             </form>
         </div>
     </div>
+@push('scripts')
+<script>
+(function () {
+    // Hapus foto tersimpan
+    document.querySelectorAll('[data-remove-ep]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var idx = btn.dataset.removeEp;
+            var hidden = document.getElementById('ep-' + idx);
+            if (hidden) hidden.disabled = true;
+            var wrap = document.querySelector('[data-ep-wrap="' + idx + '"]');
+            if (wrap) wrap.remove();
+        });
+    });
+
+    // Upload foto baru
+    var input = document.getElementById('foto_kegiatan');
+    var zone  = document.getElementById('fk-zone');
+    var preview = document.getElementById('fk-preview');
+    var placeholder = document.getElementById('fk-placeholder');
+    if (!input || !zone || !preview) return;
+
+    var files = [];
+
+    function render() {
+        preview.innerHTML = '';
+        if (!files.length) {
+            placeholder.style.display = '';
+            preview.style.display = 'none';
+            return;
+        }
+        placeholder.style.display = 'none';
+        preview.style.display = '';
+        files.forEach(function (file, i) {
+            var url = URL.createObjectURL(file);
+            var wrap = document.createElement('div');
+            wrap.style.cssText = 'position:relative;aspect-ratio:1/1;overflow:hidden;border-radius:0.75rem;border:1px solid #e5e7eb;background:#f9fafb';
+            var img = document.createElement('img');
+            img.src = url; img.alt = '';
+            img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block';
+            var btn = document.createElement('button');
+            btn.type = 'button'; btn.dataset.i = String(i);
+            btn.innerHTML = '&times;'; btn.title = 'Hapus';
+            btn.style.cssText = 'position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:#ef4444;color:#fff;font-size:15px;line-height:1;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.25)';
+            wrap.appendChild(img); wrap.appendChild(btn);
+            preview.appendChild(wrap);
+        });
+        try {
+            var dt = new DataTransfer();
+            files.forEach(function (f) { dt.items.add(f); });
+            input.files = dt.files;
+        } catch (e) {}
+    }
+
+    zone.addEventListener('click', function () { input.click(); });
+    input.addEventListener('change', function () {
+        files = files.concat(Array.from(input.files));
+        render();
+    });
+    preview.addEventListener('click', function (e) {
+        var btn = e.target.closest('button');
+        if (!btn || btn.dataset.i === undefined) return;
+        files.splice(Number(btn.dataset.i), 1);
+        render();
+    });
+    zone.addEventListener('dragover', function (e) {
+        e.preventDefault();
+        zone.style.borderColor = '#06b6d4';
+        zone.style.background = '#ecfeff';
+    });
+    zone.addEventListener('dragleave', function () {
+        zone.style.borderColor = '';
+        zone.style.background = '';
+    });
+    zone.addEventListener('drop', function (e) {
+        e.preventDefault();
+        zone.style.borderColor = ''; zone.style.background = '';
+        var dropped = Array.from(e.dataTransfer.files).filter(function (f) { return f.type.startsWith('image/'); });
+        files = files.concat(dropped);
+        render();
+    });
+})();
+</script>
+@endpush
 @endsection

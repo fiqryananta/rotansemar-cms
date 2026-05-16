@@ -1,4 +1,6 @@
-@php($title = 'Jenis Penanganan')
+@php
+    $title = 'Jenis Penanganan';
+@endphp
 @extends('layouts.admin-blade')
 
 @section('content')
@@ -6,12 +8,7 @@
         <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
             <div class="mb-8 flex items-start gap-4">
                 <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M9 11h6"></path>
-                        <path d="M9 15h6"></path>
-                        <path d="M9 7h6"></path>
-                        <rect x="4" y="3" width="16" height="18" rx="2"></rect>
-                    </svg>
+                    <i class="ti ti-notes" style="font-size:1.5rem;" aria-hidden="true"></i>
                 </div>
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900">Jenis Penanganan</h1>
@@ -29,10 +26,7 @@
                 <div class="border-b border-gray-200 p-6">
                     <form id="filter-form" method="GET" action="{{ route('jenis-penanganans.index') }}" class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div class="relative flex-1 sm:max-w-xs">
-                            <svg class="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                <circle cx="11" cy="11" r="8"></circle>
-                                <path d="m21 21-4.3-4.3"></path>
-                            </svg>
+                            <i class="ti ti-search pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-gray-400" style="font-size:1rem;" aria-hidden="true"></i>
                             <input id="search" type="text" name="search" value="{{ $filters['search'] ?? '' }}" placeholder="Cari Jenis Penanganan" class="h-10 w-full rounded-md border border-gray-300 pl-10 pr-3 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:outline-none" />
                         </div>
 
@@ -43,9 +37,10 @@
                                     <option value="{{ $size }}" @selected(($filters['per_page'] ?? 10) == $size)>{{ $size }}</option>
                                 @endforeach
                             </select>
+                            <button type="submit" class="inline-flex h-10 items-center rounded-md bg-indigo-600 px-4 text-sm font-medium text-white transition hover:bg-indigo-700">Cari</button>
 
                             <a href="{{ route('jenis-penanganans.create') }}" class="inline-flex h-10 items-center gap-2 rounded-md bg-indigo-600 px-4 text-sm font-medium text-white transition hover:bg-indigo-700">
-                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+                                <i class="ti ti-plus" style="font-size:1rem;"></i>
                                 Tambah Jenis Penanganan
                             </a>
                         </div>
@@ -80,7 +75,7 @@
                                         <td class="px-4 py-3 text-right">
                                             <div class="flex justify-end gap-2">
                                                 <a href="{{ route('jenis-penanganans.edit', $item->id) }}" class="inline-flex h-9 items-center rounded-md border border-gray-300 bg-white px-3 text-sm font-medium text-gray-700 transition hover:bg-gray-50">Edit</a>
-                                                <form method="POST" action="{{ route('jenis-penanganans.destroy', $item->id) }}" onsubmit="return confirm('Yakin ingin menghapus Jenis Penanganan {{ addslashes($item->name) }}?');">
+                                                <form method="POST" action="{{ route('jenis-penanganans.destroy', $item->id) }}" data-confirm="Yakin ingin menghapus Jenis Penanganan {{ addslashes($item->name) }}?">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="inline-flex h-9 items-center rounded-md bg-rose-50 px-3 text-sm font-medium text-rose-700 transition hover:bg-rose-100">Hapus</button>

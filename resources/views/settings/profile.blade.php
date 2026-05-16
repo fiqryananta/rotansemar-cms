@@ -97,7 +97,7 @@
             <button
                 type="submit"
                 class="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
-                onclick="return confirm('Yakin ingin menghapus akun ini?')"
+                data-confirm="Yakin ingin menghapus akun ini?"
             >
                 Hapus Akun
             </button>

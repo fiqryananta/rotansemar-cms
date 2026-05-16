@@ -1,15 +1,14 @@
-@php($title = 'Tambah Permission')
+@php
+    $title = 'Tambah Permission';
+@endphp
 @extends('layouts.admin-blade')
 
 @section('content')
     <div class="rounded-2xl border border-gray-200/70 bg-gray-50 shadow-sm">
-        <div class="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
             <div class="mb-8 flex items-start gap-4">
                 <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-rose-50 text-rose-600">
-                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <rect x="4" y="11" width="16" height="10" rx="2"></rect>
-                        <path d="M8 11V8a4 4 0 1 1 8 0v3"></path>
-                    </svg>
+                    <i class="ti ti-lock" style="font-size:1.5rem;" aria-hidden="true"></i>
                 </div>
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900">Tambah Permission</h1>

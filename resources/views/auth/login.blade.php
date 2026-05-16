@@ -1,4 +1,6 @@
-@php($title = 'Log in')
+@php
+    $title = 'Log in';
+@endphp
 @extends('layouts.auth-blade')
 
 @section('content')
@@ -60,22 +62,11 @@
                     <input id="remember" type="checkbox" name="remember" value="1" @checked(old('remember')) class="h-4 w-4 rounded border-slate-300 text-sky-600" />
                     Ingat saya
                 </label>
-
-                @if ($canResetPassword)
-                    <a href="{{ route('password.request') }}" class="text-sm font-medium text-sky-700 hover:text-sky-800">Lupa password?</a>
-                @endif
             </div>
 
             <button type="submit" class="h-10 w-full rounded-lg bg-linear-to-r from-cyan-500 to-sky-500 text-sm font-semibold text-white shadow-md shadow-cyan-200 transition hover:from-cyan-600 hover:to-sky-600">
                 Masuk
             </button>
-
-            @if ($canRegister)
-                <p class="text-center text-sm text-slate-600">
-                    Belum punya akun?
-                    <a href="{{ route('register') }}" class="font-semibold text-sky-700 hover:text-sky-800">Daftar</a>
-                </p>
-            @endif
         </form>
     </div>
 @endsection

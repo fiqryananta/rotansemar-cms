@@ -1,4 +1,6 @@
-@php($title = 'Users')
+@php
+    $title = 'Users';
+@endphp
 @extends('layouts.admin-blade')
 
 @section('content')
@@ -6,12 +8,7 @@
         <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
             <div class="mb-8 flex items-start gap-4">
                 <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-sky-50 text-sky-600">
-                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                        <circle cx="8.5" cy="7" r="4" />
-                        <path d="M20 8v6" />
-                        <path d="M17 11h6" />
-                    </svg>
+                    <i class="ti ti-user-plus" style="font-size:1.5rem;" aria-hidden="true"></i>
                 </div>
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900">Users</h1>
@@ -34,10 +31,7 @@
                 <div class="border-b border-gray-200 p-6">
                     <form id="filter-form" method="GET" action="{{ route('users.index') }}" class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div class="relative flex-1 sm:max-w-xs">
-                            <svg class="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                <circle cx="11" cy="11" r="8"></circle>
-                                <path d="m21 21-4.3-4.3"></path>
-                            </svg>
+                            <i class="ti ti-search pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-gray-400" style="font-size:1rem;" aria-hidden="true"></i>
                             <input
                                 id="search"
                                 type="text"
@@ -55,9 +49,10 @@
                                     <option value="{{ $size }}" @selected(($filters['per_page'] ?? 10) == $size)>{{ $size }}</option>
                                 @endforeach
                             </select>
+                            <button type="submit" class="inline-flex h-10 items-center rounded-md bg-sky-600 px-4 text-sm font-medium text-white transition hover:bg-sky-700">Cari</button>
 
                             <a href="{{ route('users.create') }}" class="inline-flex h-10 items-center gap-2 rounded-md bg-sky-600 px-4 text-sm font-medium text-white transition hover:bg-sky-700">
-                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+                                <i class="ti ti-plus" style="font-size:1rem;" aria-hidden="true"></i>
                                 Tambah User
                             </a>
                         </div>
@@ -72,7 +67,7 @@
                                     <th class="px-4 py-3 text-left font-semibold text-gray-700">Name</th>
                                     <th class="px-4 py-3 text-left font-semibold text-gray-700">Email</th>
                                     <th class="px-4 py-3 text-left font-semibold text-gray-700">Roles</th>
-                                    <th class="px-4 py-3 text-left font-semibold text-gray-700">Unit Scope</th>
+                                    <th class="px-4 py-3 text-left font-semibold text-gray-700">Unit</th>
                                     <th class="px-4 py-3 text-right font-semibold text-gray-700">Aksi</th>
                                 </tr>
                             </thead>
@@ -100,7 +95,7 @@
                                                 </a>
 
                                                 @if (auth()->id() !== $user->id)
-                                                    <form method="POST" action="{{ route('users.destroy', $user->id) }}" onsubmit="return confirm('Yakin ingin menghapus user {{ addslashes($user->name) }}?');">
+                                                    <form method="POST" action="{{ route('users.destroy', $user->id) }}" data-confirm="Yakin ingin menghapus user {{ addslashes($user->name) }}?">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="inline-flex h-9 items-center gap-2 rounded-md bg-rose-50 px-3 text-sm font-medium text-rose-700 transition hover:bg-rose-100">

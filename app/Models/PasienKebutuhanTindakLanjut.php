@@ -15,6 +15,7 @@ class PasienKebutuhanTindakLanjut extends Model
         'pasien_kebutuhan_id',
         'user_id',
         'keterangan',
+        'status',
     ];
 
     public function pasienKebutuhan(): BelongsTo

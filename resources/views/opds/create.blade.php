@@ -1,16 +1,14 @@
-@php($title = 'Tambah OPD')
+@php
+    $title = 'Tambah OPD';
+@endphp
 @extends('layouts.admin-blade')
 
 @section('content')
     <div class="rounded-2xl border border-gray-200/70 bg-gray-50 shadow-sm">
-        <div class="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
             <div class="mb-8 flex items-start gap-4">
                 <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <rect x="3" y="4" width="18" height="16" rx="2"></rect>
-                        <path d="M7 8h10"></path>
-                        <path d="M7 12h6"></path>
-                    </svg>
+                    <i class="ti ti-building" style="font-size:1.5rem;" aria-hidden="true"></i>
                 </div>
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900">Tambah OPD</h1>

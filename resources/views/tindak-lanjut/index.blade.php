@@ -1,4 +1,6 @@
-@php($title = 'Tindak Lanjut')
+@php
+    $title = 'Tindak Lanjut';
+@endphp
 @extends('layouts.admin-blade')
 
 @section('content')
@@ -6,11 +8,7 @@
         <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
             <div class="mb-8 flex items-start gap-4">
                 <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M9 11h6"></path>
-                        <path d="M9 15h6"></path>
-                        <rect x="4" y="3" width="16" height="18" rx="2"></rect>
-                    </svg>
+                    <i class="ti ti-clipboard-text" style="font-size:1.5rem;" aria-hidden="true"></i>
                 </div>
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900">Tindak Lanjut Penanganan</h1>
@@ -22,10 +20,7 @@
                     <form id="filter-form" method="GET" action="{{ route('tindak-lanjut.index') }}" class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                         <div class="flex flex-1 flex-col gap-3 sm:flex-row sm:max-w-4xl">
                             <div class="relative flex-1">
-                                <svg class="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                    <circle cx="11" cy="11" r="8"></circle>
-                                    <path d="m21 21-4.3-4.3"></path>
-                                </svg>
+                                <i class="ti ti-search pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-gray-400" style="font-size:1rem;" aria-hidden="true"></i>
                                 <input id="search" type="text" name="search" value="{{ $filters['search'] ?? '' }}" placeholder="Cari pasien / NIK..." class="h-10 w-full rounded-md border border-gray-300 pl-10 pr-3 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:outline-none" />
                             </div>
                             <select id="status" name="status" class="h-10 rounded-md border border-gray-300 px-3 text-sm text-gray-700 focus:border-indigo-500 focus:outline-none">

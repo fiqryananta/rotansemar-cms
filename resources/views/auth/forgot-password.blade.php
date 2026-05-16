@@ -1,14 +1,13 @@
-@php($title = 'Forgot password')
+@php
+    $title = 'Forgot password';
+@endphp
 @extends('layouts.auth-blade')
 
 @section('content')
     <div class="space-y-8">
         <div class="text-center">
             <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 shadow-lg">
-                <svg class="h-8 w-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <rect x="3" y="5" width="18" height="14" rx="2"></rect>
-                    <path d="m3 7 9 6 9-6"></path>
-                </svg>
+                <i class="ti ti-mail text-white" style="font-size:2rem;" aria-hidden="true"></i>
             </div>
             <h1 class="mt-6 text-3xl font-bold tracking-tight text-gray-900">Lupa Password?</h1>
             <p class="mt-2 text-sm text-gray-600">Masukkan email Anda untuk menerima link reset password.</p>

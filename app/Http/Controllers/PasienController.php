@@ -511,7 +511,7 @@ class PasienController extends Controller
             'kelurahans' => Kelurahan::query()->orderBy('name')->get(['id', 'name', 'kecamatan_id']),
             'pekerjaan' => Pekerjaan::query()->orderBy('name')->get(['id', 'name']),
             'opds' => Opd::query()->orderBy('name')->get(['id', 'name']),
-            'jenisPenanganans' => JenisPenanganan::query()->with('opds:id,name')->orderBy('name')->get(['id', 'name']),
+            'jenisPenanganans' => JenisPenanganan::query()->with(['opds:id,name', 'jenisKebutuhans:id,name'])->orderBy('name')->get(['id', 'name']),
             'jenisKebutuhans' => JenisKebutuhan::query()->with('jenisPenanganans:id,name')->orderBy('name')->get(['id', 'name']),
         ];
     }

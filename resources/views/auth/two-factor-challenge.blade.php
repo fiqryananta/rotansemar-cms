@@ -1,4 +1,6 @@
-@php($title = 'Two-factor authentication')
+@php
+    $title = 'Two-factor authentication';
+@endphp
 @extends('layouts.auth-blade')
 
 @section('content')

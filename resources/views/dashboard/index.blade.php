@@ -1,4 +1,6 @@
-@php($title = 'Dashboard')
+@php
+    $title = 'Dashboard';
+@endphp
 @extends('layouts.admin-blade')
 
 @section('content')
@@ -6,11 +8,7 @@
         <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
             <div class="mb-8 flex items-start gap-4">
                 <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <rect x="9" y="3" width="6" height="4" rx="1" />
-                        <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
-                        <path d="m9 14 2 2 4-4" />
-                    </svg>
+                    <i class="ti ti-layout-dashboard" style="font-size:1.5rem;" aria-hidden="true"></i>
                 </div>
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900">Dashboard</h1>

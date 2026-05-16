@@ -61,11 +61,20 @@
             @method($formMethod)
         @endif
 
+        <div class="grid gap-2 rounded-lg border border-gray-200 bg-white p-2 shadow-sm sm:grid-cols-2 lg:grid-cols-4" id="pasien-tab-nav">
+            <button type="button" data-tab-target="0" class="rounded-md border border-cyan-600 bg-cyan-600 px-3 py-2 text-sm font-semibold text-white transition">Identitas</button>
+            <button type="button" data-tab-target="1" class="rounded-md border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition hover:border-cyan-300 hover:text-cyan-700">Riwayat Kesehatan</button>
+            <button type="button" data-tab-target="2" class="rounded-md border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition hover:border-cyan-300 hover:text-cyan-700">Data Lainnya</button>
+            <button type="button" data-tab-target="3" class="rounded-md border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition hover:border-cyan-300 hover:text-cyan-700">Kebutuhan</button>
+        </div>
+
+        <div id="pasien-tab-panels" class="space-y-6">
+            <div class="space-y-6" data-tab-panel="0">
+
         <section class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
             <div class="mb-4 flex items-center justify-between gap-3">
                 <div>
-                    <h2 class="text-lg font-semibold text-gray-900">Data Pasien - Data Diri</h2>
-                    <p class="text-sm text-gray-500">Identitas dan lokasi pasien.</p>
+                    <h2 class="text-lg font-semibold text-gray-900">Data Pasien</h2>
                 </div>
             </div>
 
@@ -181,7 +190,7 @@
         </section>
 
         <section class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-            <h2 class="mb-4 text-lg font-semibold text-gray-900">Data Pasien - Pekerjaan & Keluarga</h2>
+            <h2 class="mb-4 text-lg font-semibold text-gray-900">Pekerjaan & Keluarga</h2>
             <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 <div>
                     <label class="block text-sm font-medium text-gray-700" for="economic_status">Status Ekonomi</label>
@@ -263,8 +272,12 @@
             </div>
         </section>
 
+            </div>
+
+            <div class="hidden space-y-6" data-tab-panel="1">
+
         <section class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-            <h2 class="mb-4 text-lg font-semibold text-gray-900">Data Pasien - Riwayat Kesehatan</h2>
+            <h2 class="mb-4 text-lg font-semibold text-gray-900">Riwayat Kesehatan</h2>
             <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 <div><label class="block text-sm font-medium text-gray-700" for="tb_so_ro">TB SO/RO</label><input id="tb_so_ro" name="tb_so_ro" type="number" min="0" value="{{ $value('tb_so_ro') }}" class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm" /></div>
                 <div><label class="block text-sm font-medium text-gray-700" for="treatment_start_date">Tanggal Mulai Pengobatan</label><input id="treatment_start_date" name="treatment_start_date" type="date" value="{{ $value('treatment_start_date') }}" class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm" /></div>
@@ -296,7 +309,7 @@
                     <input id="smoking_behavior" name="smoking_behavior" type="checkbox" value="1" class="mt-2 h-4 w-4 rounded border-gray-300" @checked((bool) $boolValue('smoking_behavior')) />
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700" for="family_smoking_status">Merokok Keluarga</label>
+                    <label class="block text-sm font-medium text-gray-700" for="family_smoking_status">Keluarga Merokok</label>
                     <input type="hidden" name="family_smoking_status" value="0" />
                     <input id="family_smoking_status" name="family_smoking_status" type="checkbox" value="1" class="mt-2 h-4 w-4 rounded border-gray-300" @checked((bool) $boolValue('family_smoking_status')) />
                 </div>
@@ -324,8 +337,12 @@
             </div>
         </section>
 
+            </div>
+
+            <div class="hidden space-y-6" data-tab-panel="2">
+
         <section class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-            <h2 class="mb-4 text-lg font-semibold text-gray-900">Data Pasien - Kondisi Rumah</h2>
+            <h2 class="mb-4 text-lg font-semibold text-gray-900">Kondisi Rumah</h2>
             <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 @foreach ([
                     'home_area' => 'Area Rumah',
@@ -355,7 +372,7 @@
         </section>
 
         <section class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-            <h2 class="mb-4 text-lg font-semibold text-gray-900">Data Pasien - Sanitasi & Hewan</h2>
+            <h2 class="mb-4 text-lg font-semibold text-gray-900">Sanitasi & Hewan</h2>
             <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 @foreach ([
                     'sanitation_clean_water' => 'Air Bersih',
@@ -391,8 +408,12 @@
             </div>
         </section>
 
+            </div>
+
+            <div class="hidden space-y-6" data-tab-panel="3">
+
         <section class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-            <h2 class="mb-4 text-lg font-semibold text-gray-900">Data Pasien - Catatan & Kebutuhan</h2>
+            <h2 class="mb-4 text-lg font-semibold text-gray-900">Catatan & Kebutuhan</h2>
             <div class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700" for="catatan_kebutuhan">Catatan Kebutuhan</label>
@@ -432,7 +453,7 @@
                                     <select name="kebutuhans[{{ $index }}][jenis_penanganan_id]" class="jenis-penanganan mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
                                         <option value="">Pilih</option>
                                         @foreach ($jenisPenanganans as $item)
-                                            <option value="{{ $item->id }}" data-opds='@json($item->opds->pluck("id"))' @selected((string) data_get($row, 'jenis_penanganan_id', '') === (string) $item->id)>{{ $item->name }}</option>
+                                            <option value="{{ $item->id }}" data-opds='@json($item->opds->pluck("id"))' data-kebutuhans='@json($item->jenisKebutuhans->pluck("id"))' @selected((string) data_get($row, 'jenis_penanganan_id', '') === (string) $item->id)>{{ $item->name }}</option>
                                         @endforeach
                                     </select>
                                     @error("kebutuhans.$index.jenis_penanganan_id")<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
@@ -451,9 +472,15 @@
             </div>
         </section>
 
-        <div class="flex flex-col gap-3 border-t border-gray-200 pt-4 sm:flex-row sm:items-center sm:justify-end">
-            <a href="{{ $cancelHref }}" class="inline-flex h-10 items-center rounded-md border border-gray-300 bg-white px-4 text-sm font-medium text-gray-700 hover:bg-gray-50">Batal</a>
-            <button type="submit" class="inline-flex h-10 items-center rounded-md bg-cyan-600 px-4 text-sm font-medium text-white hover:bg-cyan-700">{{ $submitLabel }}</button>
+            </div>
+        </div>
+
+        <div class="flex flex-col gap-3 border-t border-gray-200 pt-4 sm:flex-row sm:items-center">
+            <div class="flex gap-3 sm:ml-auto">
+                <button type="button" id="tab-prev" class="inline-flex h-10 items-center rounded-md border border-red-300 bg-red-50 px-4 text-sm font-medium text-red-700 transition hover:bg-red-100">Kembali</button>
+                <button type="button" id="tab-next" class="inline-flex h-10 items-center rounded-md border border-cyan-300 bg-cyan-50 px-4 text-sm font-medium text-cyan-700 transition hover:bg-cyan-100">Selanjutnya</button>
+                <button type="submit" id="tab-submit" class="hidden inline-flex h-10 items-center rounded-md bg-cyan-600 px-4 text-sm font-medium text-white hover:bg-cyan-700">{{ $submitLabel }}</button>
+            </div>
         </div>
     </form>
 </div>
@@ -488,7 +515,7 @@
                 <select name="kebutuhans[__INDEX__][jenis_penanganan_id]" class="jenis-penanganan mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
                     <option value="">Pilih</option>
                     @foreach ($jenisPenanganans as $item)
-                        <option value="{{ $item->id }}" data-opds='@json($item->opds->pluck("id"))'>{{ $item->name }}</option>
+                        <option value="{{ $item->id }}" data-opds='@json($item->opds->pluck("id"))' data-kebutuhans='@json($item->jenisKebutuhans->pluck("id"))'>{{ $item->name }}</option>
                     @endforeach
                 </select>
             </div>
@@ -503,6 +530,75 @@
 @push('scripts')
 <script>
 (function () {
+    const tabPanels = Array.from(document.querySelectorAll('[data-tab-panel]'));
+    const tabButtons = Array.from(document.querySelectorAll('[data-tab-target]'));
+    const prevButton = document.getElementById('tab-prev');
+    const nextButton = document.getElementById('tab-next');
+    const submitButton = document.getElementById('tab-submit');
+
+    const setTabButtonState = (button, active) => {
+        button.classList.toggle('bg-cyan-600', active);
+        button.classList.toggle('text-white', active);
+        button.classList.toggle('border-cyan-600', active);
+        button.classList.toggle('font-semibold', active);
+
+        button.classList.toggle('bg-white', !active);
+        button.classList.toggle('text-gray-700', !active);
+        button.classList.toggle('border-gray-200', !active);
+        button.classList.toggle('font-medium', !active);
+    };
+
+    let currentTab = 0;
+    const setActiveTab = (targetIndex) => {
+        if (!tabPanels.length) {
+            return;
+        }
+
+        currentTab = Math.min(Math.max(targetIndex, 0), tabPanels.length - 1);
+
+        tabPanels.forEach((panel, index) => {
+            panel.classList.toggle('hidden', index !== currentTab);
+        });
+
+        tabButtons.forEach((button, index) => {
+            const active = index === currentTab;
+            setTabButtonState(button, active);
+            button.setAttribute('aria-current', active ? 'step' : 'false');
+        });
+
+        const isFirst = currentTab === 0;
+        const isLast = currentTab === tabPanels.length - 1;
+
+        if (prevButton) {
+            prevButton.disabled = isFirst;
+            prevButton.classList.toggle('opacity-50', isFirst);
+            prevButton.classList.toggle('cursor-not-allowed', isFirst);
+        }
+        if (nextButton) {
+            nextButton.classList.toggle('hidden', isLast);
+        }
+        if (submitButton) {
+            submitButton.classList.toggle('hidden', !isLast);
+        }
+    };
+
+    if (tabPanels.length) {
+        const initialTab = tabPanels.findIndex((panel) => panel.querySelector('.text-red-600'));
+        setActiveTab(initialTab >= 0 ? initialTab : 0);
+    }
+
+    tabButtons.forEach((button, index) => {
+        button.addEventListener('click', () => setActiveTab(index));
+    });
+
+    if (prevButton) {
+        prevButton.addEventListener('click', () => setActiveTab(currentTab - 1));
+    }
+
+    if (nextButton) {
+        nextButton.addEventListener('click', () => setActiveTab(currentTab + 1));
+    }
+
     const kelurahanSelect = document.getElementById('kelurahan_id');
     const kecamatanSelect = document.getElementById('kecamatan_id');
     if (kelurahanSelect && kecamatanSelect) {
@@ -527,90 +623,122 @@
     const addButton = document.getElementById('add-kebutuhan');
     const template = document.getElementById('kebutuhan-template');
 
-    if (!kebutuhanList || !addButton || !template) {
-        return;
-    }
-
-    const filterPenanganan = (row) => {
-        const jenisKebutuhan = row.querySelector('.jenis-kebutuhan');
-        const opdSelect = row.querySelector('.opd-id');
-        const jenisPenanganan = row.querySelector('.jenis-penanganan');
-        if (!jenisKebutuhan || !opdSelect || !jenisPenanganan) {
-            return;
-        }
-
-        const selectedJenis = jenisKebutuhan.value;
-        const selectedOpd = opdSelect.value;
-        const selectedPenanganan = jenisPenanganan.value;
-        const options = Array.from(jenisPenanganan.querySelectorAll('option'));
-
-        options.forEach((option) => {
-            if (!option.value) {
-                option.hidden = false;
+    if (kebutuhanList && addButton && template) {
+        const filterRow = (row) => {
+            const jenisKebutuhan = row.querySelector('.jenis-kebutuhan');
+            const opdSelect = row.querySelector('.opd-id');
+            const jenisPenanganan = row.querySelector('.jenis-penanganan');
+            if (!jenisKebutuhan || !opdSelect || !jenisPenanganan) {
                 return;
             }
 
-            const allowedOpds = JSON.parse(option.dataset.opds || '[]');
-            const allowedByJenis = !selectedJenis || option.value;
-            const allowedByOpd = !selectedOpd || allowedOpds.includes(Number(selectedOpd));
-            option.hidden = !(allowedByJenis && allowedByOpd);
-        });
+            const selectedKebutuhan = Number(jenisKebutuhan.value) || null;
+            const selectedOpd = Number(opdSelect.value) || null;
+            const selectedPenanganan = jenisPenanganan.value;
+            const selectedOpdValue = opdSelect.value;
 
-        const currentOption = jenisPenanganan.querySelector(`option[value="${selectedPenanganan}"]`);
-        if (currentOption && currentOption.hidden) {
-            jenisPenanganan.value = '';
-        }
-    };
-
-    const syncRowIndex = () => {
-        const rows = Array.from(kebutuhanList.querySelectorAll('.kebutuhan-row'));
-        rows.forEach((row, index) => {
-            row.dataset.rowIndex = String(index);
-            const heading = row.querySelector('h3');
-            if (heading) {
-                heading.textContent = `Kebutuhan #${index + 1}`;
-            }
-            row.querySelectorAll('select, textarea').forEach((field) => {
-                field.name = field.name.replace(/kebutuhans\[\d+\]/, `kebutuhans[${index}]`);
+            // --- Step 1: filter jenisPenanganan by kebutuhan + opd ---
+            const penangananOptions = Array.from(jenisPenanganan.querySelectorAll('option'));
+            penangananOptions.forEach((opt) => {
+                if (!opt.value) { opt.hidden = false; return; }
+                const allowedKebutuhans = JSON.parse(opt.dataset.kebutuhans || '[]');
+                const allowedOpds = JSON.parse(opt.dataset.opds || '[]');
+                const byKebutuhan = !selectedKebutuhan || allowedKebutuhans.includes(selectedKebutuhan);
+                const byOpd = !selectedOpd || allowedOpds.includes(selectedOpd);
+                opt.hidden = !(byKebutuhan && byOpd);
             });
+
+            // reset penanganan if now hidden
+            const currentPenanganan = jenisPenanganan.querySelector(`option[value="${selectedPenanganan}"]`);
+            if (currentPenanganan && currentPenanganan.hidden) {
+                jenisPenanganan.value = '';
+            }
+
+            // --- Step 2: filter OPD based on kebutuhan only (ignoring current opd selection) ---
+            // collect OPD IDs that appear in any penanganan allowed by selected kebutuhan
+            const allowedOpdIds = new Set();
+            penangananOptions.forEach((opt) => {
+                if (!opt.value) return;
+                const allowedKebutuhans = JSON.parse(opt.dataset.kebutuhans || '[]');
+                if (!selectedKebutuhan || allowedKebutuhans.includes(selectedKebutuhan)) {
+                    JSON.parse(opt.dataset.opds || '[]').forEach((id) => allowedOpdIds.add(id));
+                }
+            });
+
+            const opdOptions = Array.from(opdSelect.querySelectorAll('option'));
+            opdOptions.forEach((opt) => {
+                if (!opt.value) { opt.hidden = false; return; }
+                opt.hidden = allowedOpdIds.size > 0 && !allowedOpdIds.has(Number(opt.value));
+            });
+
+            // reset opd if now hidden
+            const currentOpd = opdSelect.querySelector(`option[value="${selectedOpdValue}"]`);
+            if (currentOpd && currentOpd.hidden) {
+                opdSelect.value = '';
+                // re-run penanganan filter with empty opd
+                penangananOptions.forEach((opt) => {
+                    if (!opt.value) { opt.hidden = false; return; }
+                    const allowedKebutuhans = JSON.parse(opt.dataset.kebutuhans || '[]');
+                    const byKebutuhan = !selectedKebutuhan || allowedKebutuhans.includes(selectedKebutuhan);
+                    opt.hidden = !byKebutuhan;
+                });
+                const stillSelected = jenisPenanganan.querySelector(`option[value="${jenisPenanganan.value}"]`);
+                if (stillSelected && stillSelected.hidden) {
+                    jenisPenanganan.value = '';
+                }
+            }
+        };
+
+        const syncRowIndex = () => {
+            const rows = Array.from(kebutuhanList.querySelectorAll('.kebutuhan-row'));
+            rows.forEach((row, index) => {
+                row.dataset.rowIndex = String(index);
+                const heading = row.querySelector('h3');
+                if (heading) {
+                    heading.textContent = `Kebutuhan #${index + 1}`;
+                }
+                row.querySelectorAll('select, textarea').forEach((field) => {
+                    field.name = field.name.replace(/kebutuhans\[\d+\]/, `kebutuhans[${index}]`);
+                });
+            });
+        };
+
+        kebutuhanList.addEventListener('change', (event) => {
+            const target = event.target;
+            const row = target.closest('.kebutuhan-row');
+            if (row && (target.matches('.jenis-kebutuhan') || target.matches('.opd-id'))) {
+                filterRow(row);
+            }
         });
-    };
 
-    kebutuhanList.addEventListener('change', (event) => {
-        const target = event.target;
-        const row = target.closest('.kebutuhan-row');
-        if (row && (target.matches('.jenis-kebutuhan') || target.matches('.opd-id'))) {
-            filterPenanganan(row);
-        }
-    });
+        kebutuhanList.addEventListener('click', (event) => {
+            const target = event.target.closest('.remove-kebutuhan');
+            if (!target) {
+                return;
+            }
+            const rows = kebutuhanList.querySelectorAll('.kebutuhan-row');
+            if (rows.length <= 1) {
+                return;
+            }
+            target.closest('.kebutuhan-row')?.remove();
+            syncRowIndex();
+        });
 
-    kebutuhanList.addEventListener('click', (event) => {
-        const target = event.target.closest('.remove-kebutuhan');
-        if (!target) {
-            return;
-        }
-        const rows = kebutuhanList.querySelectorAll('.kebutuhan-row');
-        if (rows.length <= 1) {
-            return;
-        }
-        target.closest('.kebutuhan-row')?.remove();
-        syncRowIndex();
-    });
+        addButton.addEventListener('click', () => {
+            const index = kebutuhanList.querySelectorAll('.kebutuhan-row').length;
+            const html = template.innerHTML.replaceAll('__INDEX__', String(index)).replaceAll('__NUMBER__', String(index + 1));
+            const wrapper = document.createElement('div');
+            wrapper.innerHTML = html.trim();
+            const newRow = wrapper.firstElementChild;
+            if (!newRow) {
+                return;
+            }
+            kebutuhanList.appendChild(newRow);
+            syncRowIndex();
+        });
 
-    addButton.addEventListener('click', () => {
-        const index = kebutuhanList.querySelectorAll('.kebutuhan-row').length;
-        const html = template.innerHTML.replaceAll('__INDEX__', String(index)).replaceAll('__NUMBER__', String(index + 1));
-        const wrapper = document.createElement('div');
-        wrapper.innerHTML = html.trim();
-        const newRow = wrapper.firstElementChild;
-        if (!newRow) {
-            return;
-        }
-        kebutuhanList.appendChild(newRow);
-        syncRowIndex();
-    });
-
-    kebutuhanList.querySelectorAll('.kebutuhan-row').forEach((row) => filterPenanganan(row));
+        kebutuhanList.querySelectorAll('.kebutuhan-row').forEach((row) => filterRow(row));
+    }
 })();
 </script>
 @endpush

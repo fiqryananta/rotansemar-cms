@@ -1,4 +1,6 @@
-@php($title = 'Detail Pasien')
+@php
+    $title = 'Detail Pasien';
+@endphp
 @extends('layouts.admin-blade')
 
 @section('content')
@@ -7,10 +9,7 @@
             <div class="mb-8 flex items-start justify-between gap-4">
                 <div class="flex items-start gap-4">
                     <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-cyan-50 text-cyan-600">
-                        <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <circle cx="12" cy="7" r="4"></circle>
-                            <path d="M5.5 21a6.5 6.5 0 0 1 13 0"></path>
-                        </svg>
+                        <i class="ti ti-user" style="font-size:1.5rem;" aria-hidden="true"></i>
                     </div>
                     <div>
                         <h1 class="text-3xl font-bold text-gray-900">Detail Pasien</h1>
@@ -78,7 +77,7 @@
                         <div class="rounded-md border border-gray-200 bg-gray-50 p-3"><p class="text-xs font-medium uppercase tracking-wide text-gray-500">Status Kehamilan</p><p class="mt-1 text-sm text-gray-900">{{ $renderBoolean($pasien->pregnancy_status) }}</p></div>
                         <div class="rounded-md border border-gray-200 bg-gray-50 p-3"><p class="text-xs font-medium uppercase tracking-wide text-gray-500">Status Komorbid</p><p class="mt-1 text-sm text-gray-900">{{ $renderBoolean($pasien->comorbid_status) }}</p></div>
                         <div class="rounded-md border border-gray-200 bg-gray-50 p-3"><p class="text-xs font-medium uppercase tracking-wide text-gray-500">Perilaku Merokok</p><p class="mt-1 text-sm text-gray-900">{{ $renderBoolean($pasien->smoking_behavior) }}</p></div>
-                        <div class="rounded-md border border-gray-200 bg-gray-50 p-3"><p class="text-xs font-medium uppercase tracking-wide text-gray-500">Merokok Keluarga</p><p class="mt-1 text-sm text-gray-900">{{ $renderBoolean($pasien->family_smoking_status) }}</p></div>
+                        <div class="rounded-md border border-gray-200 bg-gray-50 p-3"><p class="text-xs font-medium uppercase tracking-wide text-gray-500">Keluarga Merokok</p><p class="mt-1 text-sm text-gray-900">{{ $renderBoolean($pasien->family_smoking_status) }}</p></div>
                         <div class="rounded-md border border-gray-200 bg-gray-50 p-3"><p class="text-xs font-medium uppercase tracking-wide text-gray-500">Status Imunisasi</p><p class="mt-1 text-sm text-gray-900">{{ $renderValue($pasien->immunization_status) }}</p></div>
                         <div class="rounded-md border border-gray-200 bg-gray-50 p-3"><p class="text-xs font-medium uppercase tracking-wide text-gray-500">Status Gizi</p><p class="mt-1 text-sm text-gray-900">{{ $renderValue($pasien->nutritional_status) }}</p></div>
                         <div class="rounded-md border border-gray-200 bg-gray-50 p-3"><p class="text-xs font-medium uppercase tracking-wide text-gray-500">Kepemilikan JKN</p><p class="mt-1 text-sm text-gray-900">{{ $renderBoolean($pasien->jkn_ownership) }}</p></div>

@@ -1,17 +1,14 @@
-@php($title = 'Tambah Jenis Penanganan')
+@php
+    $title = 'Tambah Jenis Penanganan';
+@endphp
 @extends('layouts.admin-blade')
 
 @section('content')
     <div class="rounded-2xl border border-gray-200/70 bg-gray-50 shadow-sm">
-        <div class="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
             <div class="mb-8 flex items-start gap-4">
                 <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M9 11h6"></path>
-                        <path d="M9 15h6"></path>
-                        <path d="M9 7h6"></path>
-                        <rect x="4" y="3" width="16" height="18" rx="2"></rect>
-                    </svg>
+                    <i class="ti ti-notes" style="font-size:1.5rem;" aria-hidden="true"></i>
                 </div>
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900">Tambah Jenis Penanganan</h1>

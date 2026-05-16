@@ -1,4 +1,6 @@
-@php($title = 'Confirm password')
+@php
+    $title = 'Confirm password';
+@endphp
 @extends('layouts.auth-blade')
 
 @section('content')

@@ -58,17 +58,65 @@ class DashboardController extends Controller
         })->values();
 
         $cards = [
-            ['label' => 'Pending', 'value' => $statusCounts['pending'], 'accent' => 'bg-gray-100 text-gray-700'],
-            ['label' => 'Proses', 'value' => $statusCounts['proses'], 'accent' => 'bg-blue-100 text-blue-700'],
-            ['label' => 'Pending Bantuan', 'value' => $statusCounts['pending_bantuan'], 'accent' => 'bg-amber-100 text-amber-700'],
-            ['label' => 'Tidak Layak', 'value' => $statusCounts['tidak_layak'], 'accent' => 'bg-rose-100 text-rose-700'],
-            ['label' => 'Selesai', 'value' => $statusCounts['selesai'], 'accent' => 'bg-emerald-100 text-emerald-700'],
+            [
+                'label'       => 'Pending',
+                'value'       => $statusCounts['pending'],
+                'accent'      => 'bg-gray-100 text-gray-700',
+                'icon'        => 'ti-clock',
+                'icon_bg'     => 'bg-slate-100',
+                'icon_color'  => 'text-slate-500',
+                'value_color' => 'text-slate-800',
+                'bar'         => 'bg-slate-400',
+            ],
+            [
+                'label'       => 'Proses',
+                'value'       => $statusCounts['proses'],
+                'accent'      => 'bg-blue-100 text-blue-700',
+                'icon'        => 'ti-loader',
+                'icon_bg'     => 'bg-blue-100',
+                'icon_color'  => 'text-blue-600',
+                'value_color' => 'text-blue-800',
+                'bar'         => 'bg-blue-500',
+            ],
+            [
+                'label'       => 'Pending Bantuan',
+                'value'       => $statusCounts['pending_bantuan'],
+                'accent'      => 'bg-amber-100 text-amber-700',
+                'icon'        => 'ti-alert-triangle',
+                'icon_bg'     => 'bg-amber-100',
+                'icon_color'  => 'text-amber-600',
+                'value_color' => 'text-amber-800',
+                'bar'         => 'bg-amber-500',
+            ],
+            [
+                'label'       => 'Tidak Layak',
+                'value'       => $statusCounts['tidak_layak'],
+                'accent'      => 'bg-rose-100 text-rose-700',
+                'icon'        => 'ti-circle-x',
+                'icon_bg'     => 'bg-rose-100',
+                'icon_color'  => 'text-rose-600',
+                'value_color' => 'text-rose-800',
+                'bar'         => 'bg-rose-500',
+            ],
+            [
+                'label'       => 'Selesai',
+                'value'       => $statusCounts['selesai'],
+                'accent'      => 'bg-emerald-100 text-emerald-700',
+                'icon'        => 'ti-circle-check',
+                'icon_bg'     => 'bg-emerald-100',
+                'icon_color'  => 'text-emerald-600',
+                'value_color' => 'text-emerald-800',
+                'bar'         => 'bg-emerald-500',
+            ],
         ];
 
+        $totalStatus = array_sum($statusCounts);
+
         return view('dashboard.index', [
-            'statusCounts' => $statusCounts,
+            'statusCounts'     => $statusCounts,
             'kebutuhanSummary' => $kebutuhanSummary,
-            'cards' => $cards,
+            'cards'            => $cards,
+            'totalStatus'      => $totalStatus,
         ]);
     }
 

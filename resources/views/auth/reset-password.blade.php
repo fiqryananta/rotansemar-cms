@@ -1,15 +1,13 @@
-@php($title = 'Reset password')
+@php
+    $title = 'Reset password';
+@endphp
 @extends('layouts.auth-blade')
 
 @section('content')
     <div class="space-y-8">
         <div class="text-center">
             <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 shadow-lg">
-                <svg class="h-8 w-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M12 15v2"></path>
-                    <path d="M10 11a2 2 0 1 1 4 0c0 1-1 1.5-1.5 2"></path>
-                    <rect x="3" y="3" width="18" height="18" rx="2"></rect>
-                </svg>
+                <i class="ti ti-lock-question text-white" style="font-size:2rem;" aria-hidden="true"></i>
             </div>
             <h1 class="mt-6 text-3xl font-bold tracking-tight text-gray-900">Atur Ulang Password</h1>
             <p class="mt-2 text-sm text-gray-600">Masukkan password baru untuk akun Anda.</p>

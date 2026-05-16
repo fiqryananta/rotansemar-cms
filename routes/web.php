@@ -18,6 +18,7 @@ use App\Http\Controllers\MedicationPickupController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\ProfileController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -25,6 +26,10 @@ Route::get('/', function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->middleware('permission:dashboard.view')->name('dashboard');
+
+    // Profile
+    Route::get('profile/password', [ProfileController::class, 'showChangePassword'])->name('profile.change-password');
+    Route::put('profile/password', [ProfileController::class, 'updatePassword'])->name('profile.update-password');
 
     // User Management
     Route::resource('users', UserController::class)

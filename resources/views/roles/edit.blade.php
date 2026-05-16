@@ -1,14 +1,14 @@
-@php($title = 'Edit Role')
+@php
+    $title = 'Edit Role';
+@endphp
 @extends('layouts.admin-blade')
 
 @section('content')
     <div class="rounded-2xl border border-gray-200/70 bg-gray-50 shadow-sm">
-        <div class="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
             <div class="mb-8 flex items-start gap-4">
                 <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
-                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M12 2 4 6v6c0 5 3.5 9.5 8 10 4.5-.5 8-5 8-10V6z"></path>
-                    </svg>
+                    <i class="ti ti-shield" style="font-size:1.5rem;" aria-hidden="true"></i>
                 </div>
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900">Edit Role</h1>

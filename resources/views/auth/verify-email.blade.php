@@ -1,4 +1,6 @@
-@php($title = 'Email verification')
+@php
+    $title = 'Email verification';
+@endphp
 @extends('layouts.auth-blade')
 
 @section('content')

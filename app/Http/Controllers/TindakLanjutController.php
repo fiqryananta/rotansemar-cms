@@ -93,11 +93,12 @@ class TindakLanjutController extends Controller
     {
         abort_unless($this->canAccessTindakLanjut($request->user(), $pasienKebutuhan), 403);
 
-        if (!in_array($pasienKebutuhan->verification_status, ['proses', 'pending_bantuan'], true)) {
+        if (in_array($pasienKebutuhan->verification_status, ['tidak_layak', 'selesai'], true)) {
             return back()->with('error', 'Tidak dapat menambahkan tindak lanjut pada status ini.');
         }
 
         $request->validate([
+            'status' => ['required', Rule::in(['proses', 'pending_bantuan', 'tidak_layak', 'selesai'])],
             'keterangan' => ['required', 'string', 'max:2000'],
             'fotos' => ['required', 'array', 'min:1'],
             'fotos.*' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
@@ -112,12 +113,15 @@ class TindakLanjutController extends Controller
         $tindakLanjut = $pasienKebutuhan->tindakLanjuts()->create([
             'keterangan' => $request->keterangan,
             'user_id' => $request->user()->id,
+            'status' => $request->status,
         ]);
 
         foreach ($request->file('fotos') as $foto) {
             $path = $foto->store('tindak-lanjut/' . $tindakLanjut->id, 'public');
             $tindakLanjut->fotos()->create(['path' => $path]);
         }
+
+        $pasienKebutuhan->update(['verification_status' => $request->status]);
 
         return redirect()->route('tindak-lanjut.show', $pasienKebutuhan)
             ->with('success', 'Tindak lanjut berhasil ditambahkan.');
