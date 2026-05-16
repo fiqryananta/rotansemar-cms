@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\JenisKebutuhan;
 use App\Models\PasienKebutuhan;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 
 class DashboardController extends Controller
 {
@@ -58,9 +57,18 @@ class DashboardController extends Controller
             ];
         })->values();
 
-        return Inertia::render('dashboard', [
+        $cards = [
+            ['label' => 'Pending', 'value' => $statusCounts['pending'], 'accent' => 'bg-gray-100 text-gray-700'],
+            ['label' => 'Proses', 'value' => $statusCounts['proses'], 'accent' => 'bg-blue-100 text-blue-700'],
+            ['label' => 'Pending Bantuan', 'value' => $statusCounts['pending_bantuan'], 'accent' => 'bg-amber-100 text-amber-700'],
+            ['label' => 'Tidak Layak', 'value' => $statusCounts['tidak_layak'], 'accent' => 'bg-rose-100 text-rose-700'],
+            ['label' => 'Selesai', 'value' => $statusCounts['selesai'], 'accent' => 'bg-emerald-100 text-emerald-700'],
+        ];
+
+        return view('dashboard.index', [
             'statusCounts' => $statusCounts,
             'kebutuhanSummary' => $kebutuhanSummary,
+            'cards' => $cards,
         ]);
     }
 
@@ -95,3 +103,5 @@ class DashboardController extends Controller
         return $query->whereRaw('1 = 0');
     }
 }
+
+

@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Kecamatan;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Throwable;
 
 class KecamatanController extends Controller
@@ -24,13 +23,16 @@ class KecamatanController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        return Inertia::render('Admin/Kecamatans/Index', [
+        $payload = [
             'kecamatans' => $kecamatans,
+            'links' => $kecamatans->linkCollection(),
             'filters' => [
                 'search' => $request->search ?? '',
                 'per_page' => $perPage,
             ],
-        ]);
+        ];
+
+        return view('kecamatans.index', $payload);
     }
 
     public function store(Request $request)
@@ -46,7 +48,7 @@ class KecamatanController extends Controller
 
     public function create()
     {
-        return Inertia::render('Admin/Kecamatans/Create');
+        return view('kecamatans.create');
     }
 
     public function update(Request $request, Kecamatan $kecamatan)
@@ -62,9 +64,11 @@ class KecamatanController extends Controller
 
     public function edit(Kecamatan $kecamatan)
     {
-        return Inertia::render('Admin/Kecamatans/Edit', [
+        $payload = [
             'kecamatan' => $kecamatan,
-        ]);
+        ];
+
+        return view('kecamatans.edit', $payload);
     }
 
     public function destroy(Kecamatan $kecamatan)
@@ -82,3 +86,5 @@ class KecamatanController extends Controller
         return redirect()->route('kecamatans.index')->with('success', 'Kecamatan deleted successfully');
     }
 }
+
+

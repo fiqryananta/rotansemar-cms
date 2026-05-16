@@ -6,7 +6,6 @@ use App\Models\Opd;
 use App\Models\PasienKebutuhan;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use Inertia\Inertia;
 
 class TindakLanjutController extends Controller
 {
@@ -34,8 +33,9 @@ class TindakLanjutController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        return Inertia::render('Admin/TindakLanjut/Index', [
+        $payload = [
             'kebutuhans' => $query,
+            'links' => $query->linkCollection(),
             'opds' => $this->allowedOpds($request->user()),
             'filters' => [
                 'search' => $request->search ?? '',
@@ -43,7 +43,9 @@ class TindakLanjutController extends Controller
                 'opd_id' => $request->opd_id ? (int) $request->opd_id : '',
                 'per_page' => $perPage,
             ],
-        ]);
+        ];
+
+        return view('tindak-lanjut.index', $payload);
     }
 
     public function show(PasienKebutuhan $pasienKebutuhan)
@@ -58,9 +60,19 @@ class TindakLanjutController extends Controller
             'tindakLanjuts' => fn ($q) => $q->with(['user:id,name,email', 'fotos']),
         ]);
 
-        return Inertia::render('Admin/TindakLanjut/Show', [
+        $payload = [
             'kebutuhan' => $pasienKebutuhan,
-        ]);
+            'statusLabels' => [
+                'pending' => 'Menunggu Verifikasi',
+                'proses' => 'Proses',
+                'pending_bantuan' => 'Pending Bantuan',
+                'tidak_layak' => 'Tidak Layak',
+                'selesai' => 'Selesai',
+            ],
+            'isTerminal' => in_array($pasienKebutuhan->verification_status, ['tidak_layak', 'selesai'], true),
+        ];
+
+        return view('tindak-lanjut.show', $payload);
     }
 
     public function verifikasi(Request $request, PasienKebutuhan $pasienKebutuhan)
@@ -212,3 +224,5 @@ class TindakLanjutController extends Controller
         return Opd::query()->orderBy('name')->get(['id', 'name']);
     }
 }
+
+

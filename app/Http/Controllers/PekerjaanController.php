@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Pekerjaan;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 
 class PekerjaanController extends Controller
 {
@@ -22,18 +21,21 @@ class PekerjaanController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        return Inertia::render('Admin/Pekerjaan/Index', [
+        $payload = [
             'pekerjaan' => $pekerjaan,
+            'links' => $pekerjaan->linkCollection(),
             'filters' => [
                 'search' => $request->search ?? '',
                 'per_page' => $perPage,
             ],
-        ]);
+        ];
+
+        return view('pekerjaan.index', $payload);
     }
 
     public function create()
     {
-        return Inertia::render('Admin/Pekerjaan/Create');
+        return view('pekerjaan.create');
     }
 
     public function store(Request $request)
@@ -49,9 +51,11 @@ class PekerjaanController extends Controller
 
     public function edit(Pekerjaan $pekerjaan)
     {
-        return Inertia::render('Admin/Pekerjaan/Edit', [
+        $payload = [
             'pekerjaan' => $pekerjaan,
-        ]);
+        ];
+
+        return view('pekerjaan.edit', $payload);
     }
 
     public function update(Request $request, Pekerjaan $pekerjaan)
@@ -72,3 +76,5 @@ class PekerjaanController extends Controller
         return redirect()->route('pekerjaan.index')->with('success', 'Pekerjaan deleted successfully');
     }
 }
+
+

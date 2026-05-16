@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Opd;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 
 class OpdController extends Controller
 {
@@ -22,13 +21,16 @@ class OpdController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        return Inertia::render('Admin/Opds/Index', [
+        $payload = [
             'opds' => $opds,
+            'links' => $opds->linkCollection(),
             'filters' => [
                 'search' => $request->search ?? '',
                 'per_page' => $perPage,
             ],
-        ]);
+        ];
+
+        return view('opds.index', $payload);
     }
 
     public function store(Request $request)
@@ -44,7 +46,7 @@ class OpdController extends Controller
 
     public function create()
     {
-        return Inertia::render('Admin/Opds/Create');
+        return view('opds.create');
     }
 
     public function update(Request $request, Opd $opd)
@@ -60,9 +62,11 @@ class OpdController extends Controller
 
     public function edit(Opd $opd)
     {
-        return Inertia::render('Admin/Opds/Edit', [
+        $payload = [
             'opd' => $opd,
-        ]);
+        ];
+
+        return view('opds.edit', $payload);
     }
 
     public function destroy(Opd $opd)
@@ -72,3 +76,5 @@ class OpdController extends Controller
         return redirect()->route('opds.index')->with('success', 'OPD deleted successfully');
     }
 }
+
+

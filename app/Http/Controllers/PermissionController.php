@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Spatie\Permission\Models\Permission;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 
 class PermissionController extends Controller
 {
@@ -24,13 +23,16 @@ class PermissionController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        return Inertia::render('Admin/Permissions/Index', [
+        $payload = [
             'permissions' => $permissions,
+            'links' => $permissions->linkCollection(),
             'filters' => [
                 'search' => $request->search ?? '',
                 'per_page' => $perPage,
             ],
-        ]);
+        ];
+
+        return view('permissions.index', $payload);
     }
 
     /**
@@ -38,7 +40,7 @@ class PermissionController extends Controller
      */
     public function create()
     {
-        return Inertia::render('Admin/Permissions/Create');
+        return view('permissions.create');
     }
 
     /**
@@ -60,9 +62,11 @@ class PermissionController extends Controller
      */
     public function edit(Permission $permission)
     {
-        return Inertia::render('Admin/Permissions/Edit', [
+        $payload = [
             'permission' => $permission,
-        ]);
+        ];
+
+        return view('permissions.edit', $payload);
     }
 
     /**
@@ -93,3 +97,5 @@ class PermissionController extends Controller
         return redirect()->route('permissions.index')->with('success', 'Permission deleted successfully');
     }
 }
+
+

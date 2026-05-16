@@ -6,7 +6,6 @@ use App\Models\Kecamatan;
 use App\Models\Kelurahan;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use Inertia\Inertia;
 
 class KelurahanController extends Controller
 {
@@ -30,14 +29,17 @@ class KelurahanController extends Controller
 
         $kecamatans = Kecamatan::query()->orderBy('name')->get(['id', 'name']);
 
-        return Inertia::render('Admin/Kelurahans/Index', [
+        $payload = [
             'kelurahans' => $kelurahans,
+            'links' => $kelurahans->linkCollection(),
             'kecamatans' => $kecamatans,
             'filters' => [
                 'search' => $request->search ?? '',
                 'per_page' => $perPage,
             ],
-        ]);
+        ];
+
+        return view('kelurahans.index', $payload);
     }
 
     public function store(Request $request)
@@ -61,9 +63,11 @@ class KelurahanController extends Controller
     {
         $kecamatans = Kecamatan::query()->orderBy('name')->get(['id', 'name']);
 
-        return Inertia::render('Admin/Kelurahans/Create', [
+        $payload = [
             'kecamatans' => $kecamatans,
-        ]);
+        ];
+
+        return view('kelurahans.create', $payload);
     }
 
     public function update(Request $request, Kelurahan $kelurahan)
@@ -90,10 +94,12 @@ class KelurahanController extends Controller
         $kecamatans = Kecamatan::query()->orderBy('name')->get(['id', 'name']);
         $kelurahan->load('kecamatan:id,name');
 
-        return Inertia::render('Admin/Kelurahans/Edit', [
+        $payload = [
             'kelurahan' => $kelurahan,
             'kecamatans' => $kecamatans,
-        ]);
+        ];
+
+        return view('kelurahans.edit', $payload);
     }
 
     public function destroy(Kelurahan $kelurahan)
@@ -103,3 +109,5 @@ class KelurahanController extends Controller
         return redirect()->route('kelurahans.index')->with('success', 'Kelurahan deleted successfully');
     }
 }
+
+

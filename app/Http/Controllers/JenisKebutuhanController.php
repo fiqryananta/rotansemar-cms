@@ -6,7 +6,6 @@ use App\Models\JenisKebutuhan;
 use App\Models\JenisPenanganan;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use Inertia\Inertia;
 
 class JenisKebutuhanController extends Controller
 {
@@ -29,20 +28,25 @@ class JenisKebutuhanController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        return Inertia::render('Admin/JenisKebutuhans/Index', [
+        $payload = [
             'jenisKebutuhans' => $jenisKebutuhans,
+            'links' => $jenisKebutuhans->linkCollection(),
             'filters' => [
                 'search' => $search ?? '',
                 'per_page' => $perPage,
             ],
-        ]);
+        ];
+
+        return view('jenis-kebutuhans.index', $payload);
     }
 
     public function create()
     {
-        return Inertia::render('Admin/JenisKebutuhans/Create', [
+        $payload = [
             'jenisPenanganans' => JenisPenanganan::query()->orderBy('name')->get(['id', 'name']),
-        ]);
+        ];
+
+        return view('jenis-kebutuhans.create', $payload);
     }
 
     public function store(Request $request)
@@ -66,10 +70,12 @@ class JenisKebutuhanController extends Controller
     {
         $jenisKebutuhan->load('jenisPenanganans:id,name');
 
-        return Inertia::render('Admin/JenisKebutuhans/Edit', [
+        $payload = [
             'jenisKebutuhan' => $jenisKebutuhan,
             'jenisPenanganans' => JenisPenanganan::query()->orderBy('name')->get(['id', 'name']),
-        ]);
+        ];
+
+        return view('jenis-kebutuhans.edit', $payload);
     }
 
     public function update(Request $request, JenisKebutuhan $jenisKebutuhan)
@@ -96,3 +102,5 @@ class JenisKebutuhanController extends Controller
         return redirect()->route('jenis-kebutuhans.index')->with('success', 'Jenis kebutuhan deleted successfully');
     }
 }
+
+

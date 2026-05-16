@@ -4,14 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Exports\LaporanExport;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
 
 class LaporanController extends Controller
 {
     public function index()
     {
-        return Inertia::render('Admin/Laporan/Index');
+        return view('laporan.index');
     }
 
     public function export(Request $request)
@@ -29,3 +28,5 @@ class LaporanController extends Controller
         return Excel::download(new LaporanExport($dari, $sampai), $filename);
     }
 }
+
+

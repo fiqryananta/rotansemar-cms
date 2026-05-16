@@ -6,7 +6,6 @@ use App\Models\Kelurahan;
 use App\Models\Puskesmas;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use Inertia\Inertia;
 
 class PuskesmasController extends Controller
 {
@@ -33,14 +32,17 @@ class PuskesmasController extends Controller
             ->orderBy('name')
             ->get(['id', 'kecamatan_id', 'name']);
 
-        return Inertia::render('Admin/Puskesmas/Index', [
+        $payload = [
             'puskesmas' => $puskesmas,
+            'links' => $puskesmas->linkCollection(),
             'kelurahans' => $kelurahans,
             'filters' => [
                 'search' => $request->search ?? '',
                 'per_page' => $perPage,
             ],
-        ]);
+        ];
+
+        return view('puskesmas.index', $payload);
     }
 
     public function store(Request $request)
@@ -67,9 +69,11 @@ class PuskesmasController extends Controller
             ->orderBy('name')
             ->get(['id', 'kecamatan_id', 'name']);
 
-        return Inertia::render('Admin/Puskesmas/Create', [
+        $payload = [
             'kelurahans' => $kelurahans,
-        ]);
+        ];
+
+        return view('puskesmas.create', $payload);
     }
 
     public function update(Request $request, Puskesmas $puskesmas)
@@ -103,10 +107,12 @@ class PuskesmasController extends Controller
 
         $puskesmas->load('kelurahans:id,name,kecamatan_id');
 
-        return Inertia::render('Admin/Puskesmas/Edit', [
+        $payload = [
             'puskesmas' => $puskesmas,
             'kelurahans' => $kelurahans,
-        ]);
+        ];
+
+        return view('puskesmas.edit', $payload);
     }
 
     public function destroy(Puskesmas $puskesmas)
@@ -117,3 +123,5 @@ class PuskesmasController extends Controller
         return redirect()->route('puskesmas.index')->with('success', 'Puskesmas deleted successfully');
     }
 }
+
+

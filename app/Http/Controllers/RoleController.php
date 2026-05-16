@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 
 class RoleController extends Controller
 {
@@ -27,14 +26,17 @@ class RoleController extends Controller
 
         $permissions = Permission::all();
 
-        return Inertia::render('Admin/Roles/Index', [
+        $payload = [
             'roles' => $roles,
+            'links' => $roles->linkCollection(),
             'permissions' => $permissions,
             'filters' => [
                 'search' => $request->search ?? '',
                 'per_page' => $perPage,
             ],
-        ]);
+        ];
+
+        return view('roles.index', $payload);
     }
 
     /**
@@ -44,9 +46,11 @@ class RoleController extends Controller
     {
         $permissions = Permission::all();
 
-        return Inertia::render('Admin/Roles/Create', [
+        $payload = [
             'permissions' => $permissions,
-        ]);
+        ];
+
+        return view('roles.create', $payload);
     }
 
     /**
@@ -77,11 +81,13 @@ class RoleController extends Controller
         $permissions = Permission::all();
         $rolePermissions = $role->permissions->pluck('id');
 
-        return Inertia::render('Admin/Roles/Edit', [
+        $payload = [
             'role' => $role,
             'permissions' => $permissions,
             'rolePermissions' => $rolePermissions,
-        ]);
+        ];
+
+        return view('roles.edit', $payload);
     }
 
     /**
@@ -119,3 +125,5 @@ class RoleController extends Controller
         return redirect()->route('roles.index')->with('success', 'Role deleted successfully');
     }
 }
+
+

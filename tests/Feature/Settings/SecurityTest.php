@@ -5,7 +5,6 @@ namespace Tests\Feature\Settings;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
-use Inertia\Testing\AssertableInertia as Assert;
 use Laravel\Fortify\Features;
 use Tests\TestCase;
 
@@ -27,11 +26,9 @@ class SecurityTest extends TestCase
         $this->actingAs($user)
             ->withSession(['auth.password_confirmed_at' => time()])
             ->get(route('security.edit'))
-            ->assertInertia(fn (Assert $page) => $page
-                ->component('settings/security')
-                ->where('canManageTwoFactor', true)
-                ->where('twoFactorEnabled', false),
-            );
+            ->assertViewIs('settings.security')
+            ->assertViewHas('canManageTwoFactor', true)
+            ->assertViewHas('twoFactorEnabled', false);
     }
 
     public function test_security_page_requires_password_confirmation_when_enabled()
@@ -65,9 +62,7 @@ class SecurityTest extends TestCase
         $this->actingAs($user)
             ->get(route('security.edit'))
             ->assertOk()
-            ->assertInertia(fn (Assert $page) => $page
-                ->component('settings/security'),
-            );
+            ->assertViewIs('settings.security');
     }
 
     public function test_security_page_renders_without_two_factor_when_feature_is_disabled()
@@ -81,12 +76,10 @@ class SecurityTest extends TestCase
         $this->actingAs($user)
             ->get(route('security.edit'))
             ->assertOk()
-            ->assertInertia(fn (Assert $page) => $page
-                ->component('settings/security')
-                ->where('canManageTwoFactor', false)
-                ->missing('twoFactorEnabled')
-                ->missing('requiresConfirmation'),
-            );
+            ->assertViewIs('settings.security')
+            ->assertViewHas('canManageTwoFactor', false)
+            ->assertViewMissing('twoFactorEnabled')
+            ->assertViewMissing('requiresConfirmation');
     }
 
     public function test_password_can_be_updated()

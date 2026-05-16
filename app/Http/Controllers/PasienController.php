@@ -16,7 +16,6 @@ use App\Models\Puskesmas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
-use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
 
 class PasienController extends Controller
@@ -49,34 +48,30 @@ class PasienController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        return Inertia::render('Admin/Pasiens/Index', [
+        $payload = [
             'pasiens' => $pasiens,
+            'links' => $pasiens->linkCollection(),
             'filters' => [
                 'search' => $search ?? '',
                 'per_page' => $perPage,
             ],
-        ]);
+        ];
+
+        return view('pasiens.index', $payload);
     }
 
     public function create()
     {
-        return Inertia::render('Admin/Pasiens/Create', [
-            'faskes' => Faskes::query()->orderBy('name')->get(['id', 'name']),
-            'puskesmas' => Puskesmas::query()->orderBy('name')->get(['id', 'name']),
-            'kecamatans' => Kecamatan::query()->orderBy('name')->get(['id', 'name']),
-            'kelurahans' => Kelurahan::query()->orderBy('name')->get(['id', 'name', 'kecamatan_id']),
-            'pekerjaan' => Pekerjaan::query()->orderBy('name')->get(['id', 'name']),
-            'opds' => Opd::query()->orderBy('name')->get(['id', 'name']),
-            'jenisPenanganans' => JenisPenanganan::query()->with('opds:id,name')->orderBy('name')->get(['id', 'name']),
-            'jenisKebutuhans' => JenisKebutuhan::query()->with('jenisPenanganans:id,name')->orderBy('name')->get(['id', 'name']),
-        ]);
+        $payload = $this->pasienFormOptions();
+
+        return view('pasiens.create', $payload);
     }
 
     public function importPage(Request $request)
     {
         abort_unless($this->isAdminUser($request->user()), 403);
 
-        return Inertia::render('Admin/Pasiens/Import', [
+        $payload = [
             'importSummary' => session('import_summary'),
             'importErrors' => session('import_errors', []),
             'templateColumns' => [
@@ -93,7 +88,9 @@ class PasienController extends Controller
                 'treatment_start_date',
                 'catatan_kebutuhan',
             ],
-        ]);
+        ];
+
+        return view('pasiens.import', $payload);
     }
 
     public function importTemplate(Request $request)
@@ -150,17 +147,9 @@ class PasienController extends Controller
             'kebutuhans.jenisPenanganan:id,name',
         ]);
 
-        return Inertia::render('Admin/Pasiens/Edit', [
-            'pasien' => $pasien,
-            'faskes' => Faskes::query()->orderBy('name')->get(['id', 'name']),
-            'puskesmas' => Puskesmas::query()->orderBy('name')->get(['id', 'name']),
-            'kecamatans' => Kecamatan::query()->orderBy('name')->get(['id', 'name']),
-            'kelurahans' => Kelurahan::query()->orderBy('name')->get(['id', 'name', 'kecamatan_id']),
-            'pekerjaan' => Pekerjaan::query()->orderBy('name')->get(['id', 'name']),
-            'opds' => Opd::query()->orderBy('name')->get(['id', 'name']),
-            'jenisPenanganans' => JenisPenanganan::query()->with('opds:id,name')->orderBy('name')->get(['id', 'name']),
-            'jenisKebutuhans' => JenisKebutuhan::query()->with('jenisPenanganans:id,name')->orderBy('name')->get(['id', 'name']),
-        ]);
+        $payload = array_merge(['pasien' => $pasien], $this->pasienFormOptions());
+
+        return view('pasiens.edit', $payload);
     }
 
     public function show(Request $request, Pasien $pasien)
@@ -181,9 +170,13 @@ class PasienController extends Controller
             'kebutuhans.jenisPenanganan:id,name',
         ]);
 
-        return Inertia::render('Admin/Pasiens/Show', [
+        $payload = [
             'pasien' => $pasien,
-        ]);
+            'renderValue' => fn ($value) => blank($value) ? '-' : $value,
+            'renderBoolean' => fn ($value) => is_null($value) ? '-' : ($value ? 'Ya' : 'Tidak'),
+        ];
+
+        return view('pasiens.show', $payload);
     }
 
     public function update(Request $request, Pasien $pasien)
@@ -509,6 +502,20 @@ class PasienController extends Controller
         return $validated;
     }
 
+    private function pasienFormOptions(): array
+    {
+        return [
+            'faskes' => Faskes::query()->orderBy('name')->get(['id', 'name']),
+            'puskesmas' => Puskesmas::query()->orderBy('name')->get(['id', 'name']),
+            'kecamatans' => Kecamatan::query()->orderBy('name')->get(['id', 'name']),
+            'kelurahans' => Kelurahan::query()->orderBy('name')->get(['id', 'name', 'kecamatan_id']),
+            'pekerjaan' => Pekerjaan::query()->orderBy('name')->get(['id', 'name']),
+            'opds' => Opd::query()->orderBy('name')->get(['id', 'name']),
+            'jenisPenanganans' => JenisPenanganan::query()->with('opds:id,name')->orderBy('name')->get(['id', 'name']),
+            'jenisKebutuhans' => JenisKebutuhan::query()->with('jenisPenanganans:id,name')->orderBy('name')->get(['id', 'name']),
+        ];
+    }
+
     private function isAdminUser($user): bool
     {
         if (!$user) {
@@ -520,3 +527,5 @@ class PasienController extends Controller
             ->contains('admin');
     }
 }
+
+

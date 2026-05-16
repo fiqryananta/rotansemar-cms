@@ -6,7 +6,6 @@ use App\Models\JenisPenanganan;
 use App\Models\Opd;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use Inertia\Inertia;
 
 class JenisPenangananController extends Controller
 {
@@ -29,20 +28,25 @@ class JenisPenangananController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        return Inertia::render('Admin/JenisPenanganans/Index', [
+        $payload = [
             'jenisPenanganans' => $jenisPenanganans,
+            'links' => $jenisPenanganans->linkCollection(),
             'filters' => [
                 'search' => $search ?? '',
                 'per_page' => $perPage,
             ],
-        ]);
+        ];
+
+        return view('jenis-penanganans.index', $payload);
     }
 
     public function create()
     {
-        return Inertia::render('Admin/JenisPenanganans/Create', [
+        $payload = [
             'opds' => Opd::query()->orderBy('name')->get(['id', 'name']),
-        ]);
+        ];
+
+        return view('jenis-penanganans.create', $payload);
     }
 
     public function store(Request $request)
@@ -66,10 +70,12 @@ class JenisPenangananController extends Controller
     {
         $jenisPenanganan->load('opds:id,name');
 
-        return Inertia::render('Admin/JenisPenanganans/Edit', [
+        $payload = [
             'jenisPenanganan' => $jenisPenanganan,
             'opds' => Opd::query()->orderBy('name')->get(['id', 'name']),
-        ]);
+        ];
+
+        return view('jenis-penanganans.edit', $payload);
     }
 
     public function update(Request $request, JenisPenanganan $jenisPenanganan)
@@ -96,3 +102,5 @@ class JenisPenangananController extends Controller
         return redirect()->route('jenis-penanganans.index')->with('success', 'Jenis penanganan deleted successfully');
     }
 }
+
+

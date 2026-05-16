@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Faskes;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 
 class FaskesController extends Controller
 {
@@ -22,13 +21,16 @@ class FaskesController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        return Inertia::render('Admin/Faskes/Index', [
+        $payload = [
             'faskes' => $faskes,
+            'links' => $faskes->linkCollection(),
             'filters' => [
                 'search' => $request->search ?? '',
                 'per_page' => $perPage,
             ],
-        ]);
+        ];
+
+        return view('faskes.index', $payload);
     }
 
     public function store(Request $request)
@@ -44,7 +46,7 @@ class FaskesController extends Controller
 
     public function create()
     {
-        return Inertia::render('Admin/Faskes/Create');
+        return view('faskes.create');
     }
 
     public function update(Request $request, Faskes $faskes)
@@ -60,9 +62,11 @@ class FaskesController extends Controller
 
     public function edit(Faskes $faskes)
     {
-        return Inertia::render('Admin/Faskes/Edit', [
+        $payload = [
             'faskes' => $faskes,
-        ]);
+        ];
+
+        return view('faskes.edit', $payload);
     }
 
     public function destroy(Faskes $faskes)
@@ -72,3 +76,5 @@ class FaskesController extends Controller
         return redirect()->route('faskes.index')->with('success', 'Faskes deleted successfully');
     }
 }
+
+

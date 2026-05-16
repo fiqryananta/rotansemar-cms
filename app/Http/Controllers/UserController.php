@@ -10,7 +10,6 @@ use App\Models\Puskesmas;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
-use Inertia\Inertia;
 use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
@@ -40,26 +39,31 @@ class UserController extends Controller
 
         $roles = Role::query()->orderBy('name')->get(['id', 'name']);
 
-        return Inertia::render('Admin/Users/Index', [
+        $payload = [
             'users' => $users,
+            'links' => $users->linkCollection(),
             'roles' => $roles,
             'filters' => [
                 'search' => $request->search ?? '',
                 'per_page' => $perPage,
             ],
-        ]);
+        ];
+
+        return view('users.index', $payload);
     }
 
     public function create()
     {
-        return Inertia::render('Admin/Users/Create', [
+        $payload = [
             'roles' => Role::query()->orderBy('name')->get(['id', 'name']),
             'opds' => Opd::query()->orderBy('name')->get(['id', 'name']),
             'faskes' => Faskes::query()->orderBy('name')->get(['id', 'name']),
             'puskesmas' => Puskesmas::query()->orderBy('name')->get(['id', 'name']),
             'kecamatans' => Kecamatan::query()->orderBy('name')->get(['id', 'name']),
             'kelurahans' => Kelurahan::query()->orderBy('name')->get(['id', 'name', 'kecamatan_id']),
-        ]);
+        ];
+
+        return view('users.create', $payload);
     }
 
     public function store(Request $request)
@@ -101,7 +105,7 @@ class UserController extends Controller
         $user->load(['roles:id,name']);
         $userRoleId = $user->roles->first()?->id;
 
-        return Inertia::render('Admin/Users/Edit', [
+        $payload = [
             'user' => $user,
             'roles' => Role::query()->orderBy('name')->get(['id', 'name']),
             'opds' => Opd::query()->orderBy('name')->get(['id', 'name']),
@@ -110,7 +114,9 @@ class UserController extends Controller
             'kecamatans' => Kecamatan::query()->orderBy('name')->get(['id', 'name']),
             'kelurahans' => Kelurahan::query()->orderBy('name')->get(['id', 'name', 'kecamatan_id']),
             'userRoleId' => $userRoleId,
-        ]);
+        ];
+
+        return view('users.edit', $payload);
     }
 
     public function update(Request $request, User $user)
@@ -252,3 +258,5 @@ class UserController extends Controller
         return $validated;
     }
 }
+
+

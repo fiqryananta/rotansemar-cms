@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\KegiatanPenyuluhan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Inertia\Inertia;
 
 class KegiatanPenyuluhanController extends Controller
 {
@@ -28,18 +27,21 @@ class KegiatanPenyuluhanController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        return Inertia::render('Admin/KegiatanPenyuluhan/Index', [
+        $payload = [
             'kegiatanPenyuluhans' => $kegiatanPenyuluhans,
+            'links' => $kegiatanPenyuluhans->linkCollection(),
             'filters' => [
                 'search' => $search ?? '',
                 'per_page' => $perPage,
             ],
-        ]);
+        ];
+
+        return view('kegiatan-penyuluhan.index', $payload);
     }
 
     public function create()
     {
-        return Inertia::render('Admin/KegiatanPenyuluhan/Create');
+        return view('kegiatan-penyuluhan.create');
     }
 
     public function store(Request $request)
@@ -81,9 +83,11 @@ class KegiatanPenyuluhanController extends Controller
 
     public function edit(KegiatanPenyuluhan $kegiatanPenyuluhan)
     {
-        return Inertia::render('Admin/KegiatanPenyuluhan/Edit', [
+        $payload = [
             'kegiatanPenyuluhan' => $kegiatanPenyuluhan,
-        ]);
+        ];
+
+        return view('kegiatan-penyuluhan.edit', $payload);
     }
 
     public function update(Request $request, KegiatanPenyuluhan $kegiatanPenyuluhan)
@@ -144,3 +148,5 @@ class KegiatanPenyuluhanController extends Controller
         return redirect()->route('kegiatan-penyuluhan.index')->with('success', 'Kegiatan penyuluhan deleted successfully');
     }
 }
+
+

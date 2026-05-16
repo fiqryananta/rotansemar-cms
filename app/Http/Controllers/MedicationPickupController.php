@@ -8,7 +8,6 @@ use App\Models\Pasien;
 use App\Models\Puskesmas;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use Inertia\Inertia;
 
 class MedicationPickupController extends Controller
 {
@@ -36,8 +35,9 @@ class MedicationPickupController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        return Inertia::render('Admin/MedicationPickup/Index', [
+        $payload = [
             'pickups' => $query,
+            'links' => $query->linkCollection(),
             'statuses' => [
                 'menunggu' => 'Menunggu',
                 'terrealisasi' => 'Terealisasi',
@@ -51,12 +51,14 @@ class MedicationPickupController extends Controller
                 'status' => $request->status ?? '',
                 'per_page' => $perPage,
             ],
-        ]);
+        ];
+
+        return view('medication-pickups.index', $payload);
     }
 
     public function create()
     {
-        return Inertia::render('Admin/MedicationPickup/Create', [
+        $payload = [
             'pickup' => null,
             'pasiens' => Pasien::query()->select('id', 'name', 'nik')->orderBy('name')->get(),
             'faskes' => Faskes::query()->select('id', 'name')->orderBy('name')->get(),
@@ -69,7 +71,9 @@ class MedicationPickupController extends Controller
                 'meninggal' => 'Meninggal',
                 'obat_terakhir' => 'Obat Terakhir',
             ],
-        ]);
+        ];
+
+        return view('medication-pickups.create', $payload);
     }
 
     public function store(Request $request)
@@ -96,7 +100,7 @@ class MedicationPickupController extends Controller
 
     public function edit(MedicationPickup $medicationPickup)
     {
-        return Inertia::render('Admin/MedicationPickup/Edit', [
+        $payload = [
             'pickup' => $medicationPickup->load(['pasien:id,name,nik', 'faskes:id,name', 'puskesmas:id,name', 'targetFaskes:id,name']),
             'pasiens' => Pasien::query()->select('id', 'name', 'nik')->orderBy('name')->get(),
             'faskes' => Faskes::query()->select('id', 'name')->orderBy('name')->get(),
@@ -109,7 +113,9 @@ class MedicationPickupController extends Controller
                 'meninggal' => 'Meninggal',
                 'obat_terakhir' => 'Obat Terakhir',
             ],
-        ]);
+        ];
+
+        return view('medication-pickups.edit', $payload);
     }
 
     public function update(Request $request, MedicationPickup $medicationPickup)
@@ -142,3 +148,5 @@ class MedicationPickupController extends Controller
             ->with('success', 'Pengambilan obat berhasil dihapus.');
     }
 }
+
+
