@@ -306,7 +306,7 @@ class PasienController extends Controller
             'kebutuhans.*.opd_id' => ['required', 'exists:opds,id'],
             'kebutuhans.*.jenis_penanganan_id' => ['required', 'exists:jenis_penanganans,id'],
             'kebutuhans.*.need_detail' => ['required', 'string'],
-        ])->after(function ($validator) use ($payload) {
+        ], $this->validationMessages(), $this->validationAttributes())->after(function ($validator) use ($payload) {
             $kebutuhansPayload = $payload['kebutuhans'] ?? [];
             $jkIds = array_values(array_unique(array_filter(array_column($kebutuhansPayload, 'jenis_kebutuhan_id'))));
 
@@ -331,6 +331,141 @@ class PasienController extends Controller
                 }
             }
         })->validate();
+    }
+
+    /**
+     * Pesan validasi berbahasa Indonesia untuk form pasien. Kuncinya mengikuti
+     * nama rule yang dipakai di validatePayload(), sedangkan placeholder
+     * :attribute diisi dari validationAttributes() di bawah.
+     */
+    private function validationMessages(): array
+    {
+        return [
+            'required' => ':attribute wajib diisi.',
+            'string' => ':attribute harus berupa teks.',
+            'integer' => ':attribute harus berupa angka bulat.',
+            'date' => ':attribute harus berupa tanggal yang valid.',
+            'boolean' => ':attribute wajib dipilih.',
+            'digits' => ':attribute harus terdiri dari :digits digit angka.',
+            'array' => ':attribute harus berupa daftar.',
+            'exists' => ':attribute yang dipilih tidak valid.',
+            'in' => ':attribute yang dipilih tidak valid.',
+            'unique' => ':attribute sudah terdaftar.',
+
+            // Rule ukuran punya pesan berbeda per tipe data. Laravel memilih
+            // sendiri salah satu kunci di bawah sesuai isi field.
+            'max' => [
+                'string' => ':attribute tidak boleh lebih dari :max karakter.',
+                'array' => ':attribute tidak boleh lebih dari :max item.',
+                'numeric' => ':attribute tidak boleh lebih dari :max.',
+            ],
+            'min' => [
+                'string' => ':attribute minimal :min karakter.',
+                'array' => ':attribute minimal berisi :min item.',
+                'numeric' => ':attribute tidak boleh kurang dari :min.',
+            ],
+        ];
+    }
+
+    /**
+     * Nama field pada pesan error diambil dari label yang tampil di atas tiap
+     * input pada resources/views/pasiens/_form.blade.php, supaya pengguna membaca
+     * "NIK wajib diisi." alih-alih "The nik field is required."
+     */
+    private function validationAttributes(): array
+    {
+        return [
+            // Data diri
+            'name' => 'Nama Pasien',
+            'nik' => 'NIK',
+            'birth_date' => 'Tanggal Lahir',
+            'gender' => 'Jenis Kelamin',
+            'faskes_id' => 'Faskes',
+            'puskesmas_id' => 'Puskesmas',
+            'kecamatan_id' => 'Kecamatan',
+            'kelurahan_id' => 'Kelurahan',
+            'address' => 'Alamat KTP',
+            'new_address' => 'Alamat Domisili',
+            'coordinates' => 'Koordinat',
+            'weight' => 'Berat Badan',
+            'height' => 'Tinggi Badan',
+            'ever_received_assistance' => 'Pernah Mendapatkan Bantuan',
+            'willing_to_help' => 'Bersedia Dibantu',
+
+            // Pekerjaan
+            'economic_status' => 'Status Ekonomi',
+            'pekerjaan_id' => 'Pekerjaan',
+            'workplace_name' => 'Nama Tempat Bekerja',
+            'workplace_address' => 'Alamat Tempat Bekerja',
+
+            // Keluarga
+            'family_head_name' => 'Nama Kepala Keluarga',
+            'family_head_nik' => 'NIK Kepala Keluarga',
+            'family_head_pekerjaan_id' => 'Pekerjaan Kepala Keluarga',
+            'parent_marital_status' => 'Status Perkawinan Orang Tua',
+            'parenting_pattern' => 'Pola Asuh',
+            'family_income_range' => 'Rentang Pendapatan',
+            'respondent' => 'Responden',
+            'patient_relationship' => 'Hubungan dengan Pasien',
+
+            // Riwayat kesehatan
+            'tb_so_ro' => 'TB SO/RO',
+            'treatment_start_date' => 'Tanggal Mulai Pengobatan',
+            'visit_date' => 'Tanggal Kunjungan',
+            'information_date' => 'Tanggal Informasi',
+            'treatment_status' => 'Status Pengobatan',
+            'transmission_source' => 'Sumber Penularan',
+            'follow_up_plan' => 'Rencana Tindak Lanjut',
+            'pregnancy_status' => 'Status Kehamilan',
+            'comorbid_status' => 'Status Komorbid',
+            'smoking_behavior' => 'Perilaku Merokok',
+            'family_smoking_status' => 'Keluarga Merokok',
+            'immunization_status' => 'Status Imunisasi',
+            'nutritional_status' => 'Status Gizi',
+            'jkn_ownership' => 'Kepemilikan JKN',
+
+            // Kondisi rumah, labelnya berasal dari daftar di _form.blade.php:348-364
+            'home_area' => 'Area Rumah',
+            'house_area' => 'Luas Rumah',
+            'house_type' => 'Tipe Rumah',
+            'house_status' => 'Status Rumah',
+            'home_lighting' => 'Pencahayaan',
+            'home_humidity' => 'Kelembapan',
+            'home_cleanliness' => 'Kebersihan Rumah',
+            'home_floor' => 'Lantai',
+            'home_ventilation' => 'Ventilasi',
+            'home_ceiling' => 'Plafon',
+            'home_ceiling_condition' => 'Kondisi Plafon',
+            'home_wall' => 'Dinding',
+            'home_bedroom_window' => 'Jendela Kamar',
+            'home_family_room_window' => 'Jendela Ruang Keluarga',
+            'home_kitchen_smoke_hole' => 'Lubang Asap Dapur',
+            'home_open_family_room_window' => 'Jendela Ruang Keluarga Terbuka',
+            'home_clean_house_habit' => 'Kebiasaan Membersihkan Rumah',
+
+            // Kondisi sanitasi, labelnya berasal dari daftar di _form.blade.php:378-385
+            'sanitation_clean_water' => 'Air Bersih',
+            'sanitation_toilet' => 'Toilet',
+            'sanitation_wastewater_disposal' => 'Pembuangan Air Limbah',
+            'sanitation_garbage_water_disposal' => 'Pembuangan Sampah',
+            'sanitation_trash' => 'Tempat Sampah',
+            'sanitation_feces_disposal' => 'Pembuangan Feses',
+            'sanitation_throw_trash_habit' => 'Kebiasaan Membuang Sampah',
+            'sanitation_handwashing_habit' => 'Kebiasaan Cuci Tangan',
+
+            // Kondisi hewan
+            'has_livestock' => 'Punya Ternak',
+            'has_animal_cage' => 'Punya Kandang Hewan',
+
+            // Catatan & kebutuhan. Tanda * dipakai Laravel untuk mencocokkan
+            // indeks baris, mis. kebutuhans.0.jenis_kebutuhan_id.
+            'catatan_kebutuhan' => 'Catatan Kebutuhan',
+            'kebutuhans' => 'Daftar kebutuhan',
+            'kebutuhans.*.jenis_kebutuhan_id' => 'Jenis Kebutuhan',
+            'kebutuhans.*.opd_id' => 'OPD',
+            'kebutuhans.*.jenis_penanganan_id' => 'Jenis Penanganan',
+            'kebutuhans.*.need_detail' => 'Detail Kebutuhan',
+        ];
     }
 
     private function normalizePayload(array $payload): array

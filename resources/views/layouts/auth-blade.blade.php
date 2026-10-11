@@ -49,6 +49,8 @@
                 <div class="absolute top-1/2 left-1/2 h-80 w-80 rounded-full bg-cyan-300 opacity-20 blur-3xl"></div>
             </div>
 
+            @yield('background')
+
             <div class="relative z-10 flex min-h-screen items-center justify-center px-4 py-10 sm:px-6 lg:px-8">
                 <div class="w-full max-w-md">
                     @yield('content')

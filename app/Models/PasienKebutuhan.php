@@ -11,6 +11,18 @@ class PasienKebutuhan extends Model
 {
     use HasFactory;
 
+    /**
+     * Label bahasa Indonesia untuk tiap nilai verification_status, dipakai
+     * halaman tindak lanjut dan halaman statistik.
+     */
+    public const STATUS_LABELS = [
+        'pending' => 'Menunggu Verifikasi',
+        'proses' => 'Proses',
+        'pending_bantuan' => 'Pending Bantuan',
+        'tidak_layak' => 'Tidak Layak',
+        'selesai' => 'Selesai',
+    ];
+
     protected $fillable = [
         'pasien_id',
         'jenis_kebutuhan_id',

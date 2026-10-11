@@ -44,6 +44,15 @@ class KegiatanPenyuluhanController extends Controller
         return view('kegiatan-penyuluhan.create');
     }
 
+    public function show(KegiatanPenyuluhan $kegiatanPenyuluhan)
+    {
+        $payload = [
+            'kegiatanPenyuluhan' => $kegiatanPenyuluhan,
+        ];
+
+        return view('kegiatan-penyuluhan.show', $payload);
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([

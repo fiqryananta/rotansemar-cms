@@ -75,15 +75,77 @@
             document.addEventListener('DOMContentLoaded', function () {
                 const sidebar = document.getElementById('admin-sidebar');
                 const toggle = document.getElementById('sidebar-toggle');
+                const closeBtn = document.getElementById('sidebar-close');
+                const backdrop = document.getElementById('sidebar-backdrop');
+                const desktop = window.matchMedia('(min-width: 1024px)');
 
                 if (sidebar && toggle) {
-                    toggle.addEventListener('click', function () {
-                        const isHidden = sidebar.classList.toggle('hidden');
-                        toggle.setAttribute('aria-expanded', String(!isHidden));
-                    });
-                }
+                    let desktopCollapsed = false;
+                    let mobileOpen = false;
 
-                normalizeActionButtons();
+                    // Desktop: sidebar jadi kolom statis yang bisa di-collapse.
+                    // Mobile: sidebar jadi drawer off-canvas.
+                    function renderSidebar() {
+                        if (desktop.matches) {
+                            sidebar.classList.toggle('lg:hidden', desktopCollapsed);
+                            sidebar.classList.remove('-translate-x-full');
+                            mobileOpen = false;
+                        } else {
+                            sidebar.classList.remove('lg:hidden');
+                            sidebar.classList.toggle('-translate-x-full', !mobileOpen);
+                        }
+
+                        toggle.setAttribute('aria-expanded', String(desktop.matches ? !desktopCollapsed : mobileOpen));
+
+                        if (backdrop) {
+                            backdrop.classList.toggle('hidden', desktop.matches || !mobileOpen);
+                        }
+
+                        document.body.classList.toggle('overflow-hidden', !desktop.matches && mobileOpen);
+                    }
+
+                    function setMobileOpen(open) {
+                        mobileOpen = open;
+                        renderSidebar();
+                    }
+
+                    toggle.addEventListener('click', function () {
+                        if (desktop.matches) {
+                            desktopCollapsed = !desktopCollapsed;
+                            renderSidebar();
+                        } else {
+                            setMobileOpen(!mobileOpen);
+                        }
+                    });
+
+                    if (closeBtn) {
+                        closeBtn.addEventListener('click', function () {
+                            setMobileOpen(false);
+                        });
+                    }
+
+                    if (backdrop) {
+                        backdrop.addEventListener('click', function () {
+                            setMobileOpen(false);
+                        });
+                    }
+
+                    // Tutup drawer otomatis setelah memilih menu di mobile
+                    sidebar.addEventListener('click', function (event) {
+                        if (!desktop.matches && event.target.closest('a')) {
+                            setMobileOpen(false);
+                        }
+                    });
+
+                    document.addEventListener('keydown', function (event) {
+                        if (event.key === 'Escape' && mobileOpen) {
+                            setMobileOpen(false);
+                        }
+                    });
+
+                    desktop.addEventListener('change', renderSidebar);
+                    renderSidebar();
+                }
             });
         </script>
 
@@ -187,6 +249,30 @@
 
             .ui-action-btn--neutral:hover {
                 background: #f9fafb !important;
+            }
+
+            /* Ikon mata di samping nilai koordinat (halaman detail): sengaja tanpa
+               background supaya tidak terbaca sebagai tombol aksi, jadi penanda
+               kalau bisa diklik cukup dari perubahan warnanya. Ditulis di sini,
+               bukan sebagai utility Tailwind, karena hover:text-* belum ada di
+               bundle hasil build -- sama seperti kelas .ui-action-btn di atas. */
+            .location-view-trigger {
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                flex: 0 0 auto;
+                width: 1.5rem;
+                height: 1.5rem;
+                padding: 0;
+                border: 0;
+                background: none;
+                color: #9ca3af;
+                cursor: pointer;
+                transition: color 0.15s ease;
+            }
+
+            .location-view-trigger:hover {
+                color: #0891b2;
             }
 
             /* ── Custom Confirm Dialog ────────────────────────────── */
@@ -358,7 +444,7 @@
                 background-color: #fff;
             }
             .select2-container--default .select2-selection--single .select2-selection__rendered {
-                color: #111827;
+                color: #000;
                 line-height: normal;
                 padding-left: 0.75rem;
                 padding-right: 2rem;
@@ -380,6 +466,10 @@
                 border-color: #d1d5db;
                 border-radius: 0.375rem;
                 box-shadow: 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.06);
+                /* Daftar pilihan, pesan "tidak ada hasil", dan kolom pencarian
+                   berada di dalam dropdown ini. Warnanya diwariskan dari body
+                   sehingga jadi putih saat tema gelap -> dipaksa hitam. */
+                color: #000;
             }
             .select2-search--dropdown .select2-search__field {
                 border: 1px solid #d1d5db;
@@ -401,7 +491,20 @@
                 ? 'Dashboard'
                 : ucfirst(str_replace(['-', '/'], ' ', trim($path, '/')));
             $user = auth()->user();
+
+            // Sedang impersonate? Dipakai banner di bawah header dan item menu
+            // profil. Query-nya hanya jalan saat impersonate berlangsung.
+            $impersonator = session('impersonator_id')
+                ? \App\Models\User::query()->find(session('impersonator_id'))
+                : null;
         @endphp
+
+        {{-- Backdrop drawer navigasi (mobile) --}}
+        <div
+            id="sidebar-backdrop"
+            class="fixed inset-0 z-40 hidden bg-slate-900/40 backdrop-blur-sm lg:hidden"
+            aria-hidden="true"
+        ></div>
 
         <div class="mx-auto max-w-[1600px] px-3 py-3 md:px-4 lg:px-6">
             <div class="flex min-h-[calc(100vh-1.5rem)] flex-col gap-3 lg:flex-row">
@@ -410,15 +513,19 @@
                 <main class="flex-1">
                     <header class="sticky top-0 z-20 mb-3">
                         <div class="flex min-h-16 items-center justify-between gap-3 rounded-[22px] border border-white/60 bg-white/76 px-4 shadow-[0_20px_50px_rgba(15,23,42,0.08)] backdrop-blur-xl">
-                            <button
-                                id="sidebar-toggle"
-                                type="button"
-                                aria-controls="admin-sidebar"
-                                aria-expanded="true"
-                                class="inline-flex h-10 items-center gap-2 rounded-xl border border-sky-200/70 bg-white/85 px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-sky-50 hover:text-sky-700"
-                            >
-                                <i class="ti ti-menu-2" style="font-size:1rem;" aria-hidden="true"></i>
-                            </button>
+                            <div class="flex min-w-0 items-center gap-2">
+                                <button
+                                    id="sidebar-toggle"
+                                    type="button"
+                                    aria-controls="admin-sidebar"
+                                    aria-expanded="false"
+                                    aria-label="Buka menu navigasi"
+                                    class="inline-flex h-10 shrink-0 items-center gap-2 rounded-xl border border-sky-200/70 bg-white/85 px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-sky-50 hover:text-sky-700"
+                                >
+                                    <i class="ti ti-menu-2" style="font-size:1rem;" aria-hidden="true"></i>
+                                </button>
+
+                            </div>
 
                             {{-- Profile dropdown --}}
                             <div class="relative" id="profile-dropdown-wrap">
@@ -427,17 +534,13 @@
                                     id="profile-dropdown-btn"
                                     aria-haspopup="true"
                                     aria-expanded="false"
+                                    aria-label="Menu profil"
                                     data-no-unify
                                     class="flex items-center gap-3 rounded-xl border border-sky-200/70 bg-white/85 px-3 py-2 shadow-sm transition hover:bg-sky-50"
                                 >
-                                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-sky-600 text-sm font-bold text-white select-none">
-                                        {{ mb_strtoupper(mb_substr($user?->name ?? 'U', 0, 1)) }}
+                                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-sky-600 text-white select-none">
+                                        <i class="ti ti-user" style="font-size:1.1rem;" aria-hidden="true"></i>
                                     </span>
-                                    <span class="hidden sm:block h-6 w-px bg-sky-200/70"></span>
-                                    <div class="hidden text-left sm:block max-w-[120px]">
-                                        <p class="truncate text-sm font-semibold leading-tight text-slate-700">{{ $user?->name }}</p>
-                                        <p class="truncate text-xs leading-tight text-slate-400">{{ $user?->email }}</p>
-                                    </div>
                                     <i class="ti ti-chevron-down leading-none text-slate-400 transition-transform duration-200" id="profile-chevron" style="font-size:0.85rem;" aria-hidden="true"></i>
                                 </button>
 
@@ -452,6 +555,22 @@
 
                                     {{-- Menu items --}}
                                     <div class="py-2">
+                                        @if ($impersonator)
+                                            {{-- Cadangan saat banner di atas sudah tergulung ke luar layar. --}}
+                                            <form method="POST" action="{{ route('impersonate.leave') }}" data-no-unify>
+                                                @csrf
+                                                <button
+                                                    type="submit"
+                                                    role="menuitem"
+                                                    data-no-unify
+                                                    class="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-amber-700 transition-colors hover:bg-sky-50 hover:text-sky-700"
+                                                >
+                                                    <i class="ti ti-arrow-back-up" style="font-size:1rem;" aria-hidden="true"></i>
+                                                    Kembali sebagai {{ $impersonator->name }}
+                                                </button>
+                                            </form>
+                                        @endif
+
                                         <a
                                             href="{{ route('profile.change-password') }}"
                                             role="menuitem"
@@ -490,8 +609,40 @@
                         </div>
                     </header>
 
+                    @if ($impersonator)
+                        {{-- Jalan pulang ke akun asal. Banner ini penting: user yang
+                             di-impersonate sering tidak punya izin users.view, jadi menu
+                             Users hilang dari sidebar mereka dan banner inilah satu-satunya
+                             jalan kembali yang terlihat. --}}
+                        <div class="mb-3 flex flex-col gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 sm:flex-row sm:items-center sm:justify-between">
+                            <p class="flex items-center gap-2">
+                                <i class="ti ti-user-check" style="font-size:1rem;" aria-hidden="true"></i>
+                                <span>Anda sedang login sebagai <span class="font-semibold">{{ $user->name }}</span>.</span>
+                            </p>
+                            <form method="POST" action="{{ route('impersonate.leave') }}">
+                                @csrf
+                                <button type="submit" class="inline-flex h-9 items-center gap-2 rounded-md border border-gray-300 bg-white px-3 text-sm font-medium text-gray-700 transition hover:bg-gray-50">
+                                    <i class="ti ti-arrow-back-up" style="font-size:1rem;" aria-hidden="true"></i>
+                                    Kembali sebagai {{ $impersonator->name }}
+                                </button>
+                            </form>
+                        </div>
+                    @endif
+
                     @yield('content')
                 </main>
+
+                {{--
+                    Penyeragaman tombol dijalankan di sini, bukan di DOMContentLoaded,
+                    supaya kelas ui-action-btn--* sudah terpasang saat paint pertama.
+                    Kalau dipindah kembali ke DOMContentLoaded, tombol sempat tampil
+                    dengan warna aslinya dulu (mis. "Tambah Pasien" hitam, "Import
+                    Pasien" kuning) lalu berubah ke warna seragam -- itulah kedipan
+                    warna yang terlihat. Skrip di sini berjalan saat parsing, jadi
+                    hanya satu kali paint yang terjadi. Panggilan kedua ada di akhir
+                    body, untuk tombol yang dibuat skrip halaman.
+                --}}
+                <script>normalizeActionButtons();</script>
             </div>
         </div>
         {{-- Custom Confirm Dialog --}}
@@ -747,5 +898,10 @@
         </script>
 
         @stack('scripts')
+
+        {{-- Panggilan kedua: menangkap tombol yang dibuat skrip halaman saat parsing,
+             mis. baris kebutuhan di form pasien. Idempoten, jadi aman dipanggil dua
+             kali -- kelas yang sama tidak ditambahkan ulang dan ikon tidak dobel. --}}
+        <script>normalizeActionButtons();</script>
     </body>
 </html>

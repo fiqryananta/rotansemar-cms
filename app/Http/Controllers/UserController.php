@@ -9,6 +9,7 @@ use App\Models\Opd;
 use App\Models\Puskesmas;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Models\Role;
 
@@ -164,6 +165,45 @@ class UserController extends Controller
         $user->delete();
 
         return redirect()->route('users.index')->with('success', 'User deleted successfully');
+    }
+
+    public function impersonate(Request $request, User $user)
+    {
+        $current = $request->user();
+
+        abort_if($current->is($user), 403);
+        abort_if($user->can('users.impersonate'), 403);
+
+        $request->session()->put('impersonator_id', $current->id);
+        Auth::login($user);
+
+        $landing = $user->can('dashboard.view') ? route('dashboard') : route('profile.change-password');
+
+        return redirect()->to($landing)->with('success', 'Login sebagai ' . $user->name . '.');
+    }
+
+    public function leaveImpersonation(Request $request)
+    {
+        $impersonatorId = $request->session()->pull('impersonator_id');
+
+        if (!$impersonatorId) {
+            return redirect()->route('dashboard')->with('error', 'Sesi impersonate tidak ditemukan.');
+        }
+
+        $impersonator = User::query()->find($impersonatorId);
+
+        // Akun asal sudah dihapus: sesi tidak boleh dibiarkan menggantung.
+        if (!$impersonator) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->route('login')->with('error', 'Akun asal tidak ditemukan, silakan login ulang.');
+        }
+
+        Auth::login($impersonator);
+
+        return redirect()->route('users.index')->with('success', 'Kembali sebagai ' . $impersonator->name . '.');
     }
 
     private function applyRoleScope(array $validated, Role $role): array

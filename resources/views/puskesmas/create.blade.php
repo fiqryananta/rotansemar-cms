@@ -25,29 +25,9 @@
                     @error('name')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                 </div>
 
-                <div>
-                    <p class="mb-3 block text-sm font-medium text-gray-700">Kelurahan Cakupan</p>
-                    <div class="max-h-72 space-y-2 overflow-y-auto rounded-lg border border-gray-200 bg-gray-50 p-4">
-                        @foreach ($kelurahans as $kelurahan)
-                            <label for="kelurahan-{{ $kelurahan->id }}" class="flex cursor-pointer items-start gap-3 rounded-md bg-white px-3 py-2">
-                                <input
-                                    id="kelurahan-{{ $kelurahan->id }}"
-                                    type="checkbox"
-                                    name="kelurahan_ids[]"
-                                    value="{{ $kelurahan->id }}"
-                                    @checked(in_array($kelurahan->id, old('kelurahan_ids', [])))
-                                    class="mt-0.5 h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
-                                />
-                                <span>
-                                    <span class="block text-sm font-medium text-gray-900">{{ $kelurahan->name }}</span>
-                                    <span class="block text-xs text-gray-500">{{ $kelurahan->kecamatan?->name }}</span>
-                                </span>
-                            </label>
-                        @endforeach
-                    </div>
-                    @error('kelurahan_ids')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
-                    @error('kelurahan_ids.*')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
-                </div>
+                @include('puskesmas._kelurahan-cakupan', [
+                    'selectedKelurahans' => old('kelurahan_ids', []),
+                ])
 
                 <div class="flex gap-3 pt-2">
                     <a href="{{ route('puskesmas.index') }}" class="inline-flex h-10 flex-1 items-center justify-center rounded-md border border-gray-300 bg-white text-sm font-medium text-gray-700 transition hover:bg-gray-50">Batal</a>

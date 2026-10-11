@@ -55,7 +55,6 @@
                                     <th class="px-4 py-3 text-left font-semibold text-gray-700">Lokasi</th>
                                     <th class="px-4 py-3 text-left font-semibold text-gray-700">Sasaran</th>
                                     <th class="px-4 py-3 text-left font-semibold text-gray-700">Jumlah Sasaran</th>
-                                    <th class="px-4 py-3 text-left font-semibold text-gray-700">Foto</th>
                                     <th class="px-4 py-3 text-right font-semibold text-gray-700">Aksi</th>
                                 </tr>
                             </thead>
@@ -67,9 +66,9 @@
                                         <td class="px-4 py-3 text-gray-700">{{ $item->lokasi_kegiatan }}</td>
                                         <td class="px-4 py-3 text-gray-700">{{ $item->sasaran }}</td>
                                         <td class="px-4 py-3 text-gray-700">{{ $item->jumlah_sasaran }}</td>
-                                        <td class="px-4 py-3 text-gray-700">{{ is_array($item->foto_kegiatan ?? null) ? count($item->foto_kegiatan) : 0 }} foto</td>
                                         <td class="px-4 py-3 text-right">
                                             <div class="flex justify-end gap-2">
+                                                <a href="{{ route('kegiatan-penyuluhan.show', $item->id) }}" class="inline-flex h-9 items-center rounded-md border border-gray-300 bg-white px-3 text-sm font-medium text-gray-700 transition hover:bg-gray-50">Detail</a>
                                                 <a href="{{ route('kegiatan-penyuluhan.edit', $item->id) }}" class="inline-flex h-9 items-center rounded-md border border-gray-300 bg-white px-3 text-sm font-medium text-gray-700 transition hover:bg-gray-50">Edit</a>
                                                 <form method="POST" action="{{ route('kegiatan-penyuluhan.destroy', $item->id) }}" data-confirm="Yakin ingin menghapus kegiatan ini?">
                                                     @csrf
@@ -81,7 +80,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="7" class="px-4 py-8 text-center text-gray-500">Belum Ada Kegiatan Penyuluhan</td>
+                                        <td colspan="6" class="px-4 py-8 text-center text-gray-500">Belum Ada Kegiatan Penyuluhan</td>
                                     </tr>
                                 @endforelse
                             </tbody>

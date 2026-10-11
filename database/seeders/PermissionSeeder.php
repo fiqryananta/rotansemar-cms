@@ -15,11 +15,13 @@ class PermissionSeeder extends Seeder
     {
         $permissions = [
             'dashboard.view',
+            'statistik.view',
 
             'users.view',
             'users.create',
             'users.edit',
             'users.delete',
+            'users.impersonate',
 
             'roles.view',
             'roles.create',

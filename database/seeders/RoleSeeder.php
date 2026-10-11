@@ -27,6 +27,7 @@ class RoleSeeder extends Seeder
 
         $opdRole->syncPermissions([
             'dashboard.view',
+            'statistik.view',
             'tindak-lanjut.view',
             'tindak-lanjut.verifikasi',
             'tindak-lanjut.riwayat.create',
@@ -35,24 +36,28 @@ class RoleSeeder extends Seeder
 
         $faskesRole->syncPermissions([
             'dashboard.view',
+            'statistik.view',
             'pasiens.view',
             'pasiens.create',
         ]);
 
         $puskesmasRole->syncPermissions([
             'dashboard.view',
+            'statistik.view',
             'pasiens.view',
             'pasiens.create',
         ]);
 
         $kecamatanRole->syncPermissions([
             'dashboard.view',
+            'statistik.view',
             'pasiens.view',
             'tindak-lanjut.view',
         ]);
 
         $kelurahanRole->syncPermissions([
             'dashboard.view',
+            'statistik.view',
             'pasiens.view',
             'tindak-lanjut.view',
         ]);

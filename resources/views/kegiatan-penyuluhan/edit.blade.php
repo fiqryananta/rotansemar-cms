@@ -12,7 +12,6 @@
                 </div>
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900">Edit Kegiatan Penyuluhan</h1>
-                    <p class="mt-2 text-gray-600">Perbarui detail kegiatan dan foto kegiatan.</p>
                 </div>
             </div>
 
@@ -27,7 +26,7 @@
                 <div class="grid gap-4 md:grid-cols-2">
                     <div>
                         <label class="block text-sm font-medium text-gray-700" for="nama_kegiatan">Nama Kegiatan</label>
-                        <input id="nama_kegiatan" name="nama_kegiatan" value="{{ old('nama_kegiatan', $kegiatanPenyuluhan->nama_kegiatan) }}" class="mt-1 h-10 w-full rounded-md border border-gray-300 bg-white px-3 text-sm" />
+                        <input id="nama_kegiatan" name="nama_kegiatan" value="{{ old('nama_kegiatan', $kegiatanPenyuluhan->nama_kegiatan) }}" placeholder="Masukkan nama kegiatan" class="mt-1 h-10 w-full rounded-md border border-gray-300 bg-white px-3 text-sm" />
                         @error('nama_kegiatan')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                     </div>
                     <div>
@@ -37,30 +36,41 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700" for="sasaran">Sasaran</label>
-                        <input id="sasaran" name="sasaran" value="{{ old('sasaran', $kegiatanPenyuluhan->sasaran) }}" class="mt-1 h-10 w-full rounded-md border border-gray-300 bg-white px-3 text-sm" />
+                        <input id="sasaran" name="sasaran" value="{{ old('sasaran', $kegiatanPenyuluhan->sasaran) }}" placeholder="Masukkan sasaran" class="mt-1 h-10 w-full rounded-md border border-gray-300 bg-white px-3 text-sm" />
                         @error('sasaran')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700" for="jumlah_sasaran">Jumlah Sasaran</label>
-                        <input id="jumlah_sasaran" name="jumlah_sasaran" type="number" min="1" value="{{ old('jumlah_sasaran', $kegiatanPenyuluhan->jumlah_sasaran) }}" class="mt-1 h-10 w-full rounded-md border border-gray-300 bg-white px-3 text-sm" />
+                        <input id="jumlah_sasaran" name="jumlah_sasaran" type="number" min="1" value="{{ old('jumlah_sasaran', $kegiatanPenyuluhan->jumlah_sasaran) }}" placeholder="Masukkan jumlah sasaran" class="mt-1 h-10 w-full rounded-md border border-gray-300 bg-white px-3 text-sm" />
                         @error('jumlah_sasaran')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700" for="lokasi_kegiatan">Lokasi Kegiatan</label>
-                        <input id="lokasi_kegiatan" name="lokasi_kegiatan" value="{{ old('lokasi_kegiatan', $kegiatanPenyuluhan->lokasi_kegiatan) }}" class="mt-1 h-10 w-full rounded-md border border-gray-300 bg-white px-3 text-sm" />
+                        <input id="lokasi_kegiatan" name="lokasi_kegiatan" value="{{ old('lokasi_kegiatan', $kegiatanPenyuluhan->lokasi_kegiatan) }}" placeholder="Masukkan lokasi kegiatan" class="mt-1 h-10 w-full rounded-md border border-gray-300 bg-white px-3 text-sm" />
                         @error('lokasi_kegiatan')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700" for="koordinat_lokasi">Koordinat Lokasi</label>
-                        <input id="koordinat_lokasi" name="koordinat_lokasi" value="{{ old('koordinat_lokasi', $kegiatanPenyuluhan->koordinat_lokasi) }}" class="mt-1 h-10 w-full rounded-md border border-gray-300 bg-white px-3 text-sm" placeholder="Lat, Long" />
-                        <p class="mt-1 text-xs text-gray-500">Boleh dikosongkan.</p>
+                        <label class="block text-sm font-medium text-gray-700" for="coordinates-picker">Koordinat Lokasi</label>
+                        {{-- Nilai tetap dikirim lewat input hidden, tapi tidak bisa diketik lagi:
+                             satu-satunya cara mengisinya adalah lewat peta, supaya formatnya
+                             konsisten "lat, lng" dan tidak ada koordinat yang salah tulis. --}}
+                        <input type="hidden" id="coordinates" name="koordinat_lokasi" value="{{ old('koordinat_lokasi', $kegiatanPenyuluhan->koordinat_lokasi) }}" />
+                        <button
+                            type="button"
+                            id="coordinates-picker"
+                            data-no-unify
+                            class="mt-1 inline-flex h-10 w-full items-center gap-2 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 transition hover:bg-gray-50"
+                        >
+                            <i class="ti ti-map-pin shrink-0 text-gray-400" style="font-size:1rem;" aria-hidden="true"></i>
+                            <span id="coordinates-label" class="truncate">{{ old('koordinat_lokasi', $kegiatanPenyuluhan->koordinat_lokasi) ?: 'Pilih Lokasi' }}</span>
+                        </button>
                         @error('koordinat_lokasi')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                     </div>
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700" for="uraian_kegiatan">Uraian Kegiatan</label>
-                    <textarea id="uraian_kegiatan" name="uraian_kegiatan" rows="4" class="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm">{{ old('uraian_kegiatan', $kegiatanPenyuluhan->uraian_kegiatan) }}</textarea>
+                    <textarea id="uraian_kegiatan" name="uraian_kegiatan" rows="4" placeholder="Masukkan uraian kegiatan" class="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm">{{ old('uraian_kegiatan', $kegiatanPenyuluhan->uraian_kegiatan) }}</textarea>
                     @error('uraian_kegiatan')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                 </div>
 
@@ -102,6 +112,9 @@
             </form>
         </div>
     </div>
+
+    @include('kegiatan-penyuluhan._location-picker')
+
 @push('scripts')
 <script>
 (function () {

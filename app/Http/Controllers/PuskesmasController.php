@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Kecamatan;
 use App\Models\Kelurahan;
 use App\Models\Puskesmas;
 use Illuminate\Http\Request;
@@ -64,13 +65,18 @@ class PuskesmasController extends Controller
 
     public function create()
     {
-        $kelurahans = Kelurahan::query()
-            ->with('kecamatan:id,name')
+        // Hanya kecamatan yang sudah punya kelurahan yang dikirim, supaya
+        // accordion "Kelurahan Cakupan" tidak dipenuhi grup kosong.
+        $kecamatans = Kecamatan::query()
+            ->whereHas('kelurahans')
+            ->with(['kelurahans' => fn ($query) => $query
+                ->orderBy('name')
+                ->select('id', 'kecamatan_id', 'name')])
             ->orderBy('name')
-            ->get(['id', 'kecamatan_id', 'name']);
+            ->get(['id', 'name']);
 
         $payload = [
-            'kelurahans' => $kelurahans,
+            'kecamatans' => $kecamatans,
         ];
 
         return view('puskesmas.create', $payload);
@@ -100,16 +106,21 @@ class PuskesmasController extends Controller
 
     public function edit(Puskesmas $puskesmas)
     {
-        $kelurahans = Kelurahan::query()
-            ->with('kecamatan:id,name')
+        // Hanya kecamatan yang sudah punya kelurahan yang dikirim, supaya
+        // accordion "Kelurahan Cakupan" tidak dipenuhi grup kosong.
+        $kecamatans = Kecamatan::query()
+            ->whereHas('kelurahans')
+            ->with(['kelurahans' => fn ($query) => $query
+                ->orderBy('name')
+                ->select('id', 'kecamatan_id', 'name')])
             ->orderBy('name')
-            ->get(['id', 'kecamatan_id', 'name']);
+            ->get(['id', 'name']);
 
         $puskesmas->load('kelurahans:id,name,kecamatan_id');
 
         $payload = [
             'puskesmas' => $puskesmas,
-            'kelurahans' => $kelurahans,
+            'kecamatans' => $kecamatans,
         ];
 
         return view('puskesmas.edit', $payload);

@@ -1,5 +1,6 @@
 @php
     $title = 'Users';
+    $canImpersonate = auth()->user()->can('users.impersonate');
 @endphp
 @extends('layouts.admin-blade')
 
@@ -90,6 +91,24 @@
                                         </td>
                                         <td class="px-4 py-3 text-right">
                                             <div class="flex justify-end gap-2">
+                                                @if ($canImpersonate && auth()->id() !== $user->id && ! $user->can('users.impersonate'))
+                                                    {{-- data-no-unify dipakai karena label "Login sebagai" tidak
+                                                         mengandung kata kunci apa pun, jadi tanpa kelas yang ditulis
+                                                         eksplisit ini tombolnya tidak ikut diseragamkan. --}}
+                                                    <form method="POST" action="{{ route('users.impersonate', $user->id) }}"
+                                                        data-confirm="Login sebagai {{ addslashes($user->name) }}?"
+                                                        data-confirm-title="Konfirmasi Impersonate"
+                                                        data-confirm-icon="ti-user-check"
+                                                        data-confirm-ok="Ya, Login"
+                                                        data-confirm-color="blue">
+                                                        @csrf
+                                                        <button type="submit" data-no-unify class="ui-action-btn ui-action-btn--detail">
+                                                            <i class="ti ti-user-check ui-action-icon" aria-hidden="true"></i>
+                                                            Impersonate
+                                                        </button>
+                                                    </form>
+                                                @endif
+
                                                 <a href="{{ route('users.edit', $user->id) }}" class="inline-flex h-9 items-center gap-2 rounded-md border border-gray-300 bg-white px-3 text-sm font-medium text-gray-700 transition hover:bg-gray-50">
                                                     Edit
                                                 </a>

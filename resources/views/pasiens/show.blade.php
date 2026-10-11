@@ -34,15 +34,15 @@
                         <div class="rounded-md border border-gray-200 bg-gray-50 p-3"><p class="text-xs font-medium uppercase tracking-wide text-gray-500">Puskesmas</p><p class="mt-1 text-sm text-gray-900">{{ $renderValue($pasien->puskesmas?->name) }}</p></div>
                         <div class="rounded-md border border-gray-200 bg-gray-50 p-3"><p class="text-xs font-medium uppercase tracking-wide text-gray-500">Kecamatan</p><p class="mt-1 text-sm text-gray-900">{{ $renderValue($pasien->kecamatan?->name) }}</p></div>
                         <div class="rounded-md border border-gray-200 bg-gray-50 p-3"><p class="text-xs font-medium uppercase tracking-wide text-gray-500">Kelurahan</p><p class="mt-1 text-sm text-gray-900">{{ $renderValue($pasien->kelurahan?->name) }}</p></div>
-                        <div class="rounded-md border border-gray-200 bg-gray-50 p-3"><p class="text-xs font-medium uppercase tracking-wide text-gray-500">Koordinat</p><p class="mt-1 text-sm text-gray-900">{{ $renderValue($pasien->coordinates) }}</p></div>
+                        <div class="rounded-md border border-gray-200 bg-gray-50 p-3"><p class="text-xs font-medium uppercase tracking-wide text-gray-500">Koordinat</p><div class="mt-1 flex items-center gap-1"><p class="text-sm text-gray-900">{{ $renderValue($pasien->coordinates) }}</p>@if (filled($pasien->coordinates))<button type="button" data-no-unify data-location-view="{{ $pasien->coordinates }}" aria-label="Lihat lokasi di peta" title="Lihat di peta" class="location-view-trigger"><i class="ti ti-eye" style="font-size:1rem;" aria-hidden="true"></i></button>@endif</div></div>
                         <div class="rounded-md border border-gray-200 bg-gray-50 p-3"><p class="text-xs font-medium uppercase tracking-wide text-gray-500">Berat Badan</p><p class="mt-1 text-sm text-gray-900">{{ $renderValue($pasien->weight) }}</p></div>
                         <div class="rounded-md border border-gray-200 bg-gray-50 p-3"><p class="text-xs font-medium uppercase tracking-wide text-gray-500">Tinggi Badan</p><p class="mt-1 text-sm text-gray-900">{{ $renderValue($pasien->height) }}</p></div>
                         <div class="rounded-md border border-gray-200 bg-gray-50 p-3"><p class="text-xs font-medium uppercase tracking-wide text-gray-500">Pernah Mendapatkan Bantuan</p><p class="mt-1 text-sm text-gray-900">{{ $renderBoolean($pasien->ever_received_assistance) }}</p></div>
                         <div class="rounded-md border border-gray-200 bg-gray-50 p-3"><p class="text-xs font-medium uppercase tracking-wide text-gray-500">Bersedia Dibantu</p><p class="mt-1 text-sm text-gray-900">{{ $renderBoolean($pasien->willing_to_help) }}</p></div>
                     </div>
                     <div class="grid gap-3 md:grid-cols-2">
-                        <div class="rounded-md border border-gray-200 bg-gray-50 p-3"><p class="text-xs font-medium uppercase tracking-wide text-gray-500">Alamat</p><p class="mt-1 text-sm text-gray-900">{{ $renderValue($pasien->address) }}</p></div>
-                        <div class="rounded-md border border-gray-200 bg-gray-50 p-3"><p class="text-xs font-medium uppercase tracking-wide text-gray-500">Alamat Baru</p><p class="mt-1 text-sm text-gray-900">{{ $renderValue($pasien->new_address) }}</p></div>
+                        <div class="rounded-md border border-gray-200 bg-gray-50 p-3"><p class="text-xs font-medium uppercase tracking-wide text-gray-500">Alamat KTP</p><p class="mt-1 text-sm text-gray-900">{{ $renderValue($pasien->address) }}</p></div>
+                        <div class="rounded-md border border-gray-200 bg-gray-50 p-3"><p class="text-xs font-medium uppercase tracking-wide text-gray-500">Alamat Domisili</p><p class="mt-1 text-sm text-gray-900">{{ $renderValue($pasien->new_address) }}</p></div>
                     </div>
                 </section>
 
@@ -86,4 +86,6 @@
             </div>
         </div>
     </div>
+
+    @include('partials.location-viewer')
 @endsection

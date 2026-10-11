@@ -57,7 +57,23 @@ class DashboardController extends Controller
             ];
         })->values();
 
+        // Total pasien unik dalam scope dashboard. Dihitung dengan cara yang sama
+        // seperti kolom "Total Pasien" di tabel bawah (COUNT(DISTINCT pasien_id)),
+        // jadi angkanya konsisten dengan tabel tersebut — bukan jumlah baris
+        // kebutuhan, sebab satu pasien bisa punya beberapa kebutuhan.
+        $totalPasien = (clone $baseQuery)->distinct()->count('pasien_id');
+
         $cards = [
+            [
+                'label'       => 'Total Pasien',
+                'value'       => $totalPasien,
+                'accent'      => 'bg-indigo-100 text-indigo-700',
+                'icon'        => 'ti-users',
+                'icon_bg'     => 'bg-indigo-100',
+                'icon_color'  => 'text-indigo-600',
+                'value_color' => 'text-indigo-800',
+                'bar'         => 'bg-indigo-500',
+            ],
             [
                 'label'       => 'Pending',
                 'value'       => $statusCounts['pending'],

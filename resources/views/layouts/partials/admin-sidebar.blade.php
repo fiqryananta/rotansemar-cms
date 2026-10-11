@@ -11,6 +11,12 @@
         'Laporan' => [
             ['title' => 'Laporan', 'href' => '/laporan', 'permission' => 'laporan.view', 'active' => request()->is('laporan*'), 'icon' => 'chart-bar'],
         ],
+        'Rekapitulasi' => [
+            ['title' => 'Statistik', 'href' => '/statistik', 'permission' => 'statistik.view', 'active' => request()->is('statistik*'), 'icon' => 'chart-pie'],
+            ['title' => 'Rekap OPD', 'href' => '/rekap-opd', 'permission' => 'statistik.view', 'active' => request()->is('rekap-opd*'), 'icon' => 'table'],
+            ['title' => 'Rekap Wilayah', 'href' => '/rekap-wilayah', 'permission' => 'statistik.view', 'active' => request()->is('rekap-wilayah*'), 'icon' => 'map-pin'],
+            ['title' => 'Rekap Jenis Kebutuhan', 'href' => '/rekap-jenis-kebutuhan', 'permission' => 'statistik.view', 'active' => request()->is('rekap-jenis-kebutuhan*'), 'icon' => 'category'],
+        ],
         'Kegiatan' => [
             ['title' => 'Kegiatan Penyuluhan', 'href' => '/kegiatan-penyuluhan', 'permission' => 'kegiatan-penyuluhan.view', 'active' => request()->is('kegiatan-penyuluhan*'), 'icon' => 'presentation'],
         ],
@@ -32,10 +38,24 @@
     ];
 @endphp
 
-<aside id="admin-sidebar" class="w-full border border-white/65 bg-white/55 p-3 shadow-[0_8px_20px_rgba(15,23,42,0.05)] backdrop-blur-xl transition lg:w-72 lg:rounded-2xl">
-    <a href="/dashboard" class="mb-3 flex h-14 items-center justify-center rounded-2xl border border-sky-100/80 bg-white/82 px-3 shadow-[0_14px_30px_rgba(14,116,144,0.12)]">
-        <img src="/images/logo-rotansemar.png" alt="Logo Rotan Semar" class="h-10 object-contain" />
-    </a>
+<aside
+    id="admin-sidebar"
+    class="fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] -translate-x-full overflow-y-auto overscroll-contain rounded-r-2xl border-r border-white/65 bg-white/95 p-3 shadow-[0_8px_30px_rgba(15,23,42,0.16)] backdrop-blur-xl transition-transform duration-300 ease-out lg:static lg:z-auto lg:max-w-none lg:translate-x-0 lg:overflow-visible lg:rounded-2xl lg:border lg:border-white/65 lg:bg-white/55 lg:shadow-[0_8px_20px_rgba(15,23,42,0.05)]"
+>
+    <div class="mb-3 flex items-center gap-2">
+        <a href="/dashboard" class="flex h-14 flex-1 items-center justify-center rounded-2xl border border-sky-100/80 bg-white/82 px-3 shadow-[0_14px_30px_rgba(14,116,144,0.12)]">
+            <img src="/images/logo-rotansemar.png" alt="Logo Rotan Semar" class="h-10 object-contain" />
+        </a>
+
+        <button
+            id="sidebar-close"
+            type="button"
+            aria-label="Tutup menu"
+            class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-sky-200/70 bg-white/85 text-slate-500 transition hover:bg-sky-50 hover:text-sky-700 lg:hidden"
+        >
+            <i class="ti ti-x" style="font-size:1.1rem;" aria-hidden="true"></i>
+        </button>
+    </div>
 
     <div class="space-y-3">
         @foreach ($sections as $label => $items)

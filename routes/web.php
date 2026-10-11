@@ -12,6 +12,7 @@ use App\Http\Controllers\KecamatanController;
 use App\Http\Controllers\KegiatanPenyuluhanController;
 use App\Http\Controllers\KelurahanController;
 use App\Http\Controllers\PuskesmasController;
+use App\Http\Controllers\StatistikController;
 use App\Http\Controllers\TindakLanjutController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\MedicationPickupController;
@@ -38,6 +39,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middlewareFor(['create', 'store'], 'permission:users.create')
         ->middlewareFor(['edit', 'update'], 'permission:users.edit')
         ->middlewareFor('destroy', 'permission:users.delete');
+
+    Route::post('users/{user}/impersonate', [UserController::class, 'impersonate'])
+        ->middleware('permission:users.impersonate')
+        ->name('users.impersonate');
+
+    Route::post('impersonate/leave', [UserController::class, 'leaveImpersonation'])
+        ->name('impersonate.leave');
 
     // Role Management
     Route::resource('roles', RoleController::class)
@@ -178,11 +186,30 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware('permission:laporan.view')
         ->name('laporan.export');
 
+    // Rekapitulasi
+    Route::get('statistik', [StatistikController::class, 'index'])
+        ->middleware('permission:statistik.view')
+        ->name('statistik.index');
+    Route::get('rekap-opd', [StatistikController::class, 'rekapOpd'])
+        ->middleware('permission:statistik.view')
+        ->name('rekap-opd.index');
+    Route::get('rekap-wilayah', [StatistikController::class, 'rekapWilayah'])
+        ->middleware('permission:statistik.view')
+        ->name('rekap-wilayah.index');
+    Route::get('rekap-wilayah/kelurahan/{kecamatan}', [StatistikController::class, 'rekapKelurahan'])
+        ->middleware('permission:statistik.view')
+        ->name('rekap-wilayah.kelurahan');
+    Route::get('rekap-jenis-kebutuhan', [StatistikController::class, 'rekapJenisKebutuhan'])
+        ->middleware('permission:statistik.view')
+        ->name('rekap-jenis-kebutuhan.index');
+    Route::get('rekap-jenis-kebutuhan/kelurahan/{kecamatan}', [StatistikController::class, 'rekapJenisKebutuhanKelurahan'])
+        ->middleware('permission:statistik.view')
+        ->name('rekap-jenis-kebutuhan.kelurahan');
+
     // Kegiatan Penyuluhan
     Route::resource('kegiatan-penyuluhan', KegiatanPenyuluhanController::class)
         ->parameters(['kegiatan-penyuluhan' => 'kegiatanPenyuluhan'])
-        ->except(['show'])
-        ->middlewareFor('index', 'permission:kegiatan-penyuluhan.view')
+        ->middlewareFor(['index', 'show'], 'permission:kegiatan-penyuluhan.view')
         ->middlewareFor(['create', 'store'], 'permission:kegiatan-penyuluhan.create')
         ->middlewareFor(['edit', 'update'], 'permission:kegiatan-penyuluhan.edit')
         ->middlewareFor('destroy', 'permission:kegiatan-penyuluhan.delete');

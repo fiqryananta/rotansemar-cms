@@ -15,7 +15,7 @@
                 </div>
             </div>
 
-            <div class="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+            <div class="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
                 @foreach ($cards as $card)
                     <div class="rounded-lg border bg-white p-4 shadow-sm">
                         <div class="mb-3 flex items-center justify-between">
