@@ -140,8 +140,11 @@
                                         @if ($item->fotos->count() > 0)
                                             <div class="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
                                                 @foreach ($item->fotos as $foto)
-                                                    <a href="{{ $foto->url ?? url('storage/' . $foto->path) }}" data-lb-group="rw-{{ $loop->parent->index }}" class="lb-trigger block overflow-hidden rounded-md border border-gray-300 cursor-zoom-in">
-                                                        <img src="{{ $foto->url ?? url('storage/' . $foto->path) }}" alt="Bukti tindak lanjut" class="aspect-square h-full w-full object-cover transition duration-150 hover:brightness-90" />
+                                                    {{-- URL dibangun dari host request yang sedang dipakai (url()),
+                                                         bukan dari accessor $foto->url yang membaca APP_URL di .env.
+                                                         Jadi foto tetap tampil walau aplikasi dibuka lewat link lain. --}}
+                                                    <a href="{{ url('storage/' . $foto->path) }}" data-lb-group="rw-{{ $loop->parent->index }}" class="lb-trigger block overflow-hidden rounded-md border border-gray-300 cursor-zoom-in">
+                                                        <img src="{{ url('storage/' . $foto->path) }}" alt="Bukti tindak lanjut" class="aspect-square h-full w-full object-cover transition duration-150 hover:brightness-90" />
                                                     </a>
                                                 @endforeach
                                             </div>

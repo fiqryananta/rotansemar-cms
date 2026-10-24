@@ -193,18 +193,40 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('rekap-opd', [StatistikController::class, 'rekapOpd'])
         ->middleware('permission:statistik.view')
         ->name('rekap-opd.index');
+    // Rincian pasien per OPD untuk modal Rekap OPD; dimuat lewat AJAX.
+    Route::get('rekap-opd/{opd}', [StatistikController::class, 'rekapOpdDetail'])
+        ->middleware('permission:statistik.view')
+        ->name('rekap-opd.detail');
     Route::get('rekap-wilayah', [StatistikController::class, 'rekapWilayah'])
         ->middleware('permission:statistik.view')
         ->name('rekap-wilayah.index');
+    // Rincian pasien per kecamatan untuk modal Rekap Wilayah; dimuat lewat AJAX.
+    Route::get('rekap-wilayah/{kecamatan}', [StatistikController::class, 'rekapWilayahDetail'])
+        ->middleware('permission:statistik.view')
+        ->name('rekap-wilayah.detail');
     Route::get('rekap-wilayah/kelurahan/{kecamatan}', [StatistikController::class, 'rekapKelurahan'])
         ->middleware('permission:statistik.view')
         ->name('rekap-wilayah.kelurahan');
+    // Rincian pasien per kelurahan untuk modal Rekap Wilayah; dimuat lewat AJAX.
+    // Ditaruh setelah rute kelurahan di atas supaya pola 3 segmen itu tetap
+    // menang untuk URL rincian tabel.
+    Route::get('rekap-wilayah/kelurahan/{kelurahan}/detail', [StatistikController::class, 'rekapKelurahanDetail'])
+        ->middleware('permission:statistik.view')
+        ->name('rekap-wilayah.kelurahan-detail');
     Route::get('rekap-jenis-kebutuhan', [StatistikController::class, 'rekapJenisKebutuhan'])
         ->middleware('permission:statistik.view')
         ->name('rekap-jenis-kebutuhan.index');
+    // Rincian pasien per kecamatan untuk modal Rekap Jenis Kebutuhan.
+    Route::get('rekap-jenis-kebutuhan/{kecamatan}', [StatistikController::class, 'rekapJenisKebutuhanDetail'])
+        ->middleware('permission:statistik.view')
+        ->name('rekap-jenis-kebutuhan.detail');
     Route::get('rekap-jenis-kebutuhan/kelurahan/{kecamatan}', [StatistikController::class, 'rekapJenisKebutuhanKelurahan'])
         ->middleware('permission:statistik.view')
         ->name('rekap-jenis-kebutuhan.kelurahan');
+    // Rincian pasien per kelurahan untuk modal Rekap Jenis Kebutuhan.
+    Route::get('rekap-jenis-kebutuhan/kelurahan/{kelurahan}/detail', [StatistikController::class, 'rekapJenisKebutuhanKelurahanDetail'])
+        ->middleware('permission:statistik.view')
+        ->name('rekap-jenis-kebutuhan.kelurahan-detail');
 
     // Kegiatan Penyuluhan
     Route::resource('kegiatan-penyuluhan', KegiatanPenyuluhanController::class)

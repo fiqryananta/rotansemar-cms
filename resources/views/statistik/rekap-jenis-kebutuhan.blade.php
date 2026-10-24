@@ -1,5 +1,11 @@
 @php
     $title = 'Rekap Jenis Kebutuhan';
+
+    // Filter kelurahan yang sedang aktif ikut dibawa ke modal dan rincian
+    // kelurahan, supaya angkanya sama dengan baris yang diklik.
+    $filterQuery = (int) ($filters['kelurahan_id'] ?? 0) > 0
+        ? ['kelurahan_id' => (int) $filters['kelurahan_id']]
+        : [];
 @endphp
 @extends('layouts.admin-blade')
 
@@ -19,6 +25,11 @@
                     <h1 class="text-3xl font-bold text-gray-900">Rekap Jenis Kebutuhan</h1>
                 </div>
             </div>
+
+            {{-- Filter kecamatan dan kelurahan, langsung menyaring tabel di bawah. --}}
+            @include('statistik._wilayah-filter', [
+                'action' => route('rekap-jenis-kebutuhan.index'),
+            ])
 
             <div class="rounded-lg border border-gray-200 bg-white shadow-sm">
                 <div class="border-b border-gray-200 p-4">
@@ -42,14 +53,43 @@
                                 @forelse ($kecamatanSummary as $row)
                                     <tr class="cursor-pointer hover:bg-gray-50" data-kecamatan-id="{{ $row['id'] }}" data-loaded="0">
                                         <td class="px-4 py-3 font-medium text-gray-900">
-                                            <button type="button" class="inline-flex items-center gap-2 text-left font-medium text-gray-900" data-kecamatan-toggle aria-expanded="false">
-                                                <i class="ti ti-chevron-right text-gray-400 transition-transform duration-200" style="font-size:1rem;" data-chevron aria-hidden="true"></i>
-                                                <span>{{ $row['name'] }}</span>
-                                            </button>
+                                            <div class="flex items-center gap-2">
+                                                {{-- Chevron tetap membuka rincian kelurahan seperti sebelumnya. --}}
+                                                <button type="button" aria-label="Buka rincian kelurahan" data-kecamatan-toggle aria-expanded="false" class="inline-flex cursor-pointer items-center">
+                                                    <i class="ti ti-chevron-right text-gray-400 transition-transform duration-200" style="font-size:1rem;" data-chevron aria-hidden="true"></i>
+                                                </button>
+
+                                                {{-- Nama kecamatan membuka modal daftar pasien, sama seperti di Rekap Wilayah. --}}
+                                                <button
+                                                    type="button"
+                                                    data-no-unify
+                                                    data-rekap-detail
+                                                    data-rekap-name="{{ $row['name'] }}"
+                                                    data-rekap-url="{{ route('rekap-jenis-kebutuhan.detail', [$row['id']] + $filterQuery) }}"
+                                                    class="cursor-pointer text-left font-medium text-cyan-700 underline"
+                                                >{{ $row['name'] }}</button>
+                                            </div>
                                         </td>
                                         <td class="px-4 py-3 text-center font-semibold text-gray-900">{{ $row['total_pasien'] }}</td>
                                         @foreach ($jenisKebutuhans as $id => $jenis)
-                                            <td class="px-4 py-3 text-center text-gray-700">{{ $row['counts'][$id] ?? 0 }}</td>
+                                            <td class="px-4 py-3 text-center text-gray-700">
+                                                {{-- Angka 0 tidak perlu diklik: tidak ada pasien untuk ditampilkan. --}}
+                                                @if (($row['counts'][$id] ?? 0) > 0)
+                                                    <button
+                                                        type="button"
+                                                        data-no-unify
+                                                        data-rekap-detail
+                                                        data-rekap-name="{{ $row['name'] }}"
+                                                        data-rekap-url="{{ route('rekap-jenis-kebutuhan.detail', [$row['id']] + $filterQuery) }}"
+                                                        data-filter-key="jenis"
+                                                        data-filter-value="{{ $id }}"
+                                                        data-filter-label="Jenis Kebutuhan: {{ $jenis }}"
+                                                        class="cursor-pointer font-medium text-cyan-700 underline"
+                                                    >{{ $row['counts'][$id] }}</button>
+                                                @else
+                                                    {{ $row['counts'][$id] ?? 0 }}
+                                                @endif
+                                            </td>
                                         @endforeach
                                     </tr>
                                 @empty
@@ -74,6 +114,9 @@
                     </div>
                 </div>
             </div>
+
+            {{-- Modal daftar pasien, dipakai bersama Rekap OPD dan Rekap Wilayah. --}}
+            @include('statistik._rekap-detail')
         </div>
     </div>
 @endsection
@@ -89,7 +132,20 @@
 
 @include('statistik._drilldown', [
     'tableId'    => 'rekap-jenis-kebutuhan',
-    'endpoint'   => route('rekap-jenis-kebutuhan.kelurahan', ['kecamatan' => '__ID__']),
+    // Filter kelurahan ikut dikirim supaya baris anak dan modalnya memakai
+    // himpunan data yang sama dengan baris induknya.
+    'endpoint'   => route('rekap-jenis-kebutuhan.kelurahan', ['kecamatan' => '__ID__'] + $filterQuery),
     'emptyText'  => 'Belum ada data kelurahan.',
     'columnKeys' => $drilldownKeys,
+    // Baris kelurahan ikut jadi pemicu modal, sama seperti di Rekap Wilayah.
+    'detailUrl'     => route('rekap-jenis-kebutuhan.kelurahan-detail', ['kelurahan' => '__ID__'] + $filterQuery),
+    // Angka per jenis kebutuhan di baris kelurahan membuka modal dengan filter
+    // jenis yang sama.
+    'filterColumns' => $jenisKebutuhans->mapWithKeys(fn ($name, $id) => [
+        'counts.' . $id => [
+            'key'   => 'jenis',
+            'value' => (int) $id,
+            'label' => 'Jenis Kebutuhan: ' . $name,
+        ],
+    ])->all(),
 ])

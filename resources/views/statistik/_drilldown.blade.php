@@ -9,6 +9,16 @@
     - $columnKeys : jalur nilai tiap kolom pada objek baris JSON, urut sesuai kolom
                     tabel. Jalur bertitik didukung, mis. 'counts.12'.
     - $emptyText  : teks saat kecamatan tidak punya kelurahan berdata
+
+    Opsional, untuk baris kelurahan yang juga bisa diklik (Rekap Wilayah dan Rekap
+    Jenis Kebutuhan):
+    - $detailUrl     : URL rincian pasien satu kelurahan, dengan '__ID__' sebagai
+                       placeholder id kelurahan. Kalau diisi, nama dan angka di
+                       baris kelurahan jadi pemicu modal data-rekap-detail.
+    - $filterColumns : pasangan jalur kolom => ['key' => ..., 'value' => ...,
+                       'label' => ...] untuk angka yang bisa diklik, mis. kolom
+                       status di Rekap Wilayah atau kolom jenis di Rekap Jenis
+                       Kebutuhan.
 --}}
 @push('scripts')
 <script>
@@ -23,6 +33,8 @@
     var KEYS = @json(array_values($columnKeys));
     var COLSPAN = KEYS.length;
     var EMPTY_TEXT = @json($emptyText);
+    var DETAIL_URL = @json($detailUrl ?? null);
+    var FILTER_COLUMNS = @json($filterColumns ?? []);
 
     /*
      * Baris kelurahan dibangun di sisi klien, jadi kelasnya harus sama persis
@@ -41,6 +53,27 @@
         }, item);
     }
 
+    // Tombol pemicu modal rincian pasien di dalam baris kelurahan. Kelasnya
+    // disamakan dengan pemicu di baris kecamatan supaya terbaca sama.
+    function detailTrigger(text, item, filter, className) {
+        var button = document.createElement('button');
+        button.type = 'button';
+        button.className = className;
+        button.textContent = text == null ? '' : text;
+        button.setAttribute('data-no-unify', '');
+        button.setAttribute('data-rekap-detail', '');
+        button.setAttribute('data-rekap-name', item.name == null ? '' : item.name);
+        button.setAttribute('data-rekap-url', DETAIL_URL.replace('__ID__', encodeURIComponent(item.id)));
+
+        if (filter) {
+            button.setAttribute('data-filter-key', filter.key);
+            button.setAttribute('data-filter-value', filter.value);
+            button.setAttribute('data-filter-label', filter.label);
+        }
+
+        return button;
+    }
+
     function childRow(item) {
         var tr = document.createElement('tr');
         tr.className = 'bg-sky-50 text-gray-600';
@@ -52,7 +85,18 @@
 
             var td = document.createElement('td');
             td.className = CHILD_CLASSES[index];
-            td.textContent = value == null ? '' : value;
+
+            if (DETAIL_URL && index === 0) {
+                // Nama kelurahan membuka modal daftar pasien, sama seperti nama
+                // kecamatan di baris induknya.
+                td.appendChild(detailTrigger(value, item, null, 'cursor-pointer text-left font-medium text-cyan-700 underline'));
+            } else if (DETAIL_URL && FILTER_COLUMNS[key] && Number(value) > 0) {
+                // Angka 0 tidak perlu diklik: tidak ada pasien untuk ditampilkan.
+                td.appendChild(detailTrigger(value, item, FILTER_COLUMNS[key], 'cursor-pointer font-medium text-cyan-700 underline'));
+            } else {
+                td.textContent = value == null ? '' : value;
+            }
+
             tr.appendChild(td);
         });
 
@@ -164,6 +208,10 @@
     // ikut terhitung, termasuk klik pada tombolnya (termasuk Enter/Space, karena
     // tombol mengirim event click).
     tbody.addEventListener('click', function (event) {
+        // Pemicu modal rincian pasien punya perilakunya sendiri; klik di situ
+        // tidak boleh ikut membuka/menutup rincian kelurahan.
+        if (event.target.closest('[data-rekap-detail]')) return;
+
         var row = event.target.closest('tr[data-kecamatan-id]');
         if (!row || !tbody.contains(row)) return;
 

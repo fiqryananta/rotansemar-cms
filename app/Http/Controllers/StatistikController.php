@@ -62,11 +62,48 @@ class StatistikController extends Controller
         $names = $this->opdNames($request->user(), $rows);
 
         return view('statistik.rekap-opd', [
+            'statusLabels' => PasienKebutuhan::STATUS_LABELS,
             'opdSummary' => $names
                 ->map(fn ($name, $id) => $this->rekapRow($rows->get($id), $name, (int) $id))
                 ->values(),
             'totals'     => $this->rekapTotals((clone $baseQuery)->whereNotNull('opd_id')),
         ]);
+    }
+
+    /**
+     * Rincian pasien untuk satu OPD, dipanggil lewat AJAX dari modal Rekap OPD.
+     *
+     * Tanpa parameter status, yang dikirim adalah seluruh pasien yang punya
+     * kebutuhan di OPD itu. Dengan ?status=selesai (misalnya), daftarnya dibatasi
+     * pada pasien yang punya kebutuhan berstatus itu, dan baris kebutuhan yang
+     * ikut dikirim juga hanya yang berstatus itu. Dengan begitu isi modal selalu
+     * sama dengan angka yang barusan diklik di tabel rekap.
+     *
+     * Scope aksesnya memakai scopeDashboard yang sama dengan tabelnya, jadi user
+     * yang ter-scope ke satu OPD/faskes/puskesmas/wilayah tidak bisa membuka data
+     * di luar jangkauannya walau id OPD di URL diganti.
+     */
+    public function rekapOpdDetail(Request $request, Opd $opd)
+    {
+        [$status, $jenis, $filterLabel] = $this->detailFilters($request);
+
+        $kebutuhans = $this->applyDetailFilters(
+            MobileAccessScope::scopeDashboard(PasienKebutuhan::query(), $request->user())
+                ->where('pasien_kebutuhans.opd_id', $opd->id),
+            $status,
+            $jenis
+        )
+            ->with([
+                'pasien:id,name,nik',
+                'jenisKebutuhan:id,name',
+                'opd:id,name',
+                'jenisPenanganan:id,name',
+            ])
+            ->withCount('tindakLanjuts')
+            ->orderBy('pasien_kebutuhans.id')
+            ->get();
+
+        return $this->detailResponse($opd->name, $filterLabel, $kebutuhans);
     }
 
     /**
@@ -80,20 +117,34 @@ class StatistikController extends Controller
     public function rekapWilayah(Request $request)
     {
         $baseQuery = MobileAccessScope::scopeDashboard(PasienKebutuhan::query(), $request->user());
+        [$kecamatanId, $kelurahanId] = $this->wilayahFilterIds($request);
 
-        $rows = $this->wilayahQuery($baseQuery)
+        $kecamatans = $this->wilayahFilterOptions($request->user());
+
+        // Baris tabel: agregat dengan filter yang sedang aktif. Kalau satu
+        // kecamatan dipilih, barisnya tetap ditampilkan walau datanya kosong,
+        // supaya pilihan filternya tidak berujung di tabel kosong.
+        $rows = $this->applyWilayahFilter($this->wilayahQuery($baseQuery), $kecamatanId, $kelurahanId)
             ->selectRaw('pasiens.kecamatan_id as wilayah_id, ' . $this->rekapColumns())
             ->groupBy('pasiens.kecamatan_id')
             ->get()
             ->keyBy('wilayah_id');
 
-        $names = $this->kecamatanNames($request->user(), $rows);
+        $names = $kecamatanId > 0
+            ? $kecamatans->only([$kecamatanId])
+            : $this->kecamatanNames($request->user(), $rows);
 
         return view('statistik.rekap-wilayah', [
+            'statusLabels'     => PasienKebutuhan::STATUS_LABELS,
             'kecamatanSummary' => $names
                 ->map(fn ($name, $id) => $this->rekapRow($rows->get($id), $name, (int) $id))
                 ->values(),
-            'totals'           => $this->rekapTotals($this->wilayahQuery($baseQuery)),
+            'totals'           => $this->rekapTotals(
+                $this->applyWilayahFilter($this->wilayahQuery($baseQuery), $kecamatanId, $kelurahanId)
+            ),
+            'filters'          => ['kecamatan_id' => $kecamatanId, 'kelurahan_id' => $kelurahanId],
+            'kecamatans'       => $kecamatans,
+            'kelurahans'       => $this->kelurahanOptions($request->user(), $kecamatans),
         ]);
     }
 
@@ -112,10 +163,14 @@ class StatistikController extends Controller
     public function rekapKelurahan(Request $request, Kecamatan $kecamatan)
     {
         $baseQuery = MobileAccessScope::scopeDashboard(PasienKebutuhan::query(), $request->user());
+        $kelurahanId = (int) $request->query('kelurahan_id', 0);
 
         $rows = $this->wilayahQuery($baseQuery)
             ->selectRaw('pasiens.kelurahan_id as wilayah_id, ' . $this->rekapColumns())
             ->where('pasiens.kecamatan_id', $kecamatan->id)
+            // Filter kelurahan di tabel ikut berlaku di sini, supaya angka baris
+            // induk dan rinciannya selalu berasal dari himpunan data yang sama.
+            ->when($kelurahanId > 0, fn ($query) => $query->where('pasiens.kelurahan_id', $kelurahanId))
             ->groupBy('pasiens.kelurahan_id')
             ->get()
             ->keyBy('wilayah_id');
@@ -128,6 +183,218 @@ class StatistikController extends Controller
                 ->map(fn ($name, $id) => $this->rekapRow($rows->get($id), $name, (int) $id))
                 ->values()
                 ->all(),
+        ]);
+    }
+
+    /**
+     * Rincian pasien untuk satu kecamatan, dipanggil lewat AJAX dari modal Rekap
+     * Wilayah -- perilakunya sama dengan rekapOpdDetail(), hanya pengelompokannya
+     * yang memakai pasiens.kecamatan_id.
+     *
+     * Tanpa parameter status, yang dikirim adalah seluruh pasien yang punya
+     * kebutuhan di kecamatan itu. Dengan ?status=selesai (misalnya), daftarnya
+     * dibatasi pada pasien yang punya kebutuhan berstatus itu, dan baris kebutuhan
+     * yang ikut dikirim juga hanya yang berstatus itu -- jadi isi modal selalu sama
+     * dengan angka yang barusan diklik di tabel rekap.
+     *
+     * Join ke pasiens dipakai supaya kualifikasi kolomnya sama dengan
+     * rekapKelurahan(), dan scope aksesnya tetap scopeDashboard, sehingga user yang
+     * ter-scope ke satu wilayah tidak bisa membuka kecamatan lain walau id di URL
+     * diganti.
+     */
+    public function rekapWilayahDetail(Request $request, Kecamatan $kecamatan)
+    {
+        return $this->wilayahDetail($request, 'pasiens.kecamatan_id', $kecamatan->id, $kecamatan->name);
+    }
+
+    /**
+     * Rincian pasien untuk satu kelurahan, dipanggil dari baris kelurahan hasil
+     * drilldown Rekap Wilayah. Sama seperti rekapWilayahDetail(), hanya
+     * pengelompokannya yang memakai pasiens.kelurahan_id.
+     */
+    public function rekapKelurahanDetail(Request $request, Kelurahan $kelurahan)
+    {
+        return $this->wilayahDetail($request, 'pasiens.kelurahan_id', $kelurahan->id, $kelurahan->name);
+    }
+
+    /**
+     * Rincian pasien satu kecamatan untuk modal Rekap Jenis Kebutuhan. Isinya sama
+     * dengan rekapWilayahDetail(); bedanya tabel sumbernya punya kolom per jenis
+     * kebutuhan, sehingga modalnya biasa dibuka dengan filter ?jenis=.
+     */
+    public function rekapJenisKebutuhanDetail(Request $request, Kecamatan $kecamatan)
+    {
+        return $this->wilayahDetail($request, 'pasiens.kecamatan_id', $kecamatan->id, $kecamatan->name);
+    }
+
+    /**
+     * Rincian pasien satu kelurahan untuk modal Rekap Jenis Kebutuhan, dipanggil
+     * dari baris kelurahan hasil drilldown.
+     */
+    public function rekapJenisKebutuhanKelurahanDetail(Request $request, Kelurahan $kelurahan)
+    {
+        return $this->wilayahDetail($request, 'pasiens.kelurahan_id', $kelurahan->id, $kelurahan->name);
+    }
+
+    /**
+     * Isi modal rincian untuk satu wilayah (kecamatan atau kelurahan).
+     *
+     * Tanpa parameter filter, yang dikirim adalah seluruh pasien yang punya
+     * kebutuhan di wilayah itu. Dengan ?status=selesai, ?jenis=2, atau
+     * ?kelurahan_id=3 (misalnya), daftarnya dibatasi pada pasien yang punya
+     * kebutuhan seperti itu, dan baris kebutuhan yang ikut dikirim juga hanya yang
+     * cocok -- jadi isi modal selalu sama dengan angka yang barusan diklik di tabel
+     * rekap, termasuk saat tabelnya sedang difilter per kelurahan.
+     *
+     * Join ke pasiens dipakai supaya kualifikasi kolomnya sama dengan
+     * rekapKelurahan(), dan scope aksesnya tetap scopeDashboard, sehingga user yang
+     * ter-scope ke satu wilayah tidak bisa membuka wilayah lain walau id di URL
+     * diganti.
+     */
+    private function wilayahDetail(Request $request, string $column, int $id, string $title)
+    {
+        [$status, $jenis, $kelurahan, $filterLabel] = $this->detailFilters($request);
+
+        $kebutuhans = $this->applyDetailFilters(
+            $this->wilayahQuery(MobileAccessScope::scopeDashboard(PasienKebutuhan::query(), $request->user()))
+                ->where($column, $id),
+            $status,
+            $jenis
+        )
+            ->when($kelurahan !== null, fn ($query) => $query->where('pasiens.kelurahan_id', $kelurahan->id))
+            ->with([
+                'pasien:id,name,nik',
+                'jenisKebutuhan:id,name',
+                'opd:id,name',
+                'jenisPenanganan:id,name',
+            ])
+            ->withCount('tindakLanjuts')
+            ->orderBy('pasien_kebutuhans.id')
+            ->get();
+
+        return $this->detailResponse($title, $filterLabel, $kebutuhans);
+    }
+
+    /**
+     * Filter yang dipakai modal rincian: [status, jenis kebutuhan, kelurahan,
+     * label].
+     *
+     * Label siap pakai untuk subjudul modal, mis. 'Status: Selesai' atau
+     * 'Jenis Kebutuhan: Kesehatan · Kelurahan: Sukamaju'. Kalau tidak ada filter,
+     * labelnya null dan modal menampilkan 'Semua data'.
+     */
+    private function detailFilters(Request $request): array
+    {
+        $status = $this->statusFilter($request);
+        $jenis = $this->jenisFilter($request);
+        $kelurahan = $this->kelurahanFilter($request);
+
+        $labels = [];
+        if ($status !== null) {
+            $labels[] = 'Status: ' . PasienKebutuhan::STATUS_LABELS[$status];
+        }
+        if ($jenis !== null) {
+            $labels[] = 'Jenis Kebutuhan: ' . $jenis->name;
+        }
+        if ($kelurahan !== null) {
+            $labels[] = 'Kelurahan: ' . $kelurahan->name;
+        }
+
+        return [$status, $jenis, $kelurahan, $labels ? implode(' · ', $labels) : null];
+    }
+
+    /**
+     * Menerapkan filter modal ke query kebutuhan.
+     */
+    private function applyDetailFilters($query, ?string $status, ?JenisKebutuhan $jenis)
+    {
+        return $query
+            ->when($status !== null, fn ($q) => $q->where('pasien_kebutuhans.verification_status', $status))
+            ->when($jenis !== null, fn ($q) => $q->where('pasien_kebutuhans.jenis_kebutuhan_id', $jenis->id));
+    }
+
+    /**
+     * Status yang diminta lewat ?status=, atau null kalau kosong/tidak dikenal.
+     *
+     * Nilai yang tidak dikenal sengaja diperlakukan sebagai "semua status", bukan
+     * error, supaya URL yang diubah tangan tidak memecahkan modal.
+     */
+    private function statusFilter(Request $request): ?string
+    {
+        $status = (string) $request->query('status', '');
+
+        return array_key_exists($status, PasienKebutuhan::STATUS_LABELS) ? $status : null;
+    }
+
+    /**
+     * Jenis kebutuhan yang diminta lewat ?jenis=, atau null kalau kosong/tidak ada.
+     * Barisnya diambil sekalian supaya namanya bisa dipakai sebagai label modal.
+     */
+    private function jenisFilter(Request $request): ?JenisKebutuhan
+    {
+        $id = (int) $request->query('jenis', 0);
+
+        return $id > 0 ? JenisKebutuhan::query()->find($id) : null;
+    }
+
+    /**
+     * Kelurahan yang diminta lewat ?kelurahan_id=, atau null kalau kosong/tidak ada.
+     *
+     * Dipakai saat tabelnya sedang difilter per kelurahan: modal yang dibuka dari
+     * baris kecamatan ikut dibatasi ke kelurahan itu, supaya isinya sama dengan
+     * angka yang tertera di barisnya.
+     */
+    private function kelurahanFilter(Request $request): ?Kelurahan
+    {
+        $id = (int) $request->query('kelurahan_id', 0);
+
+        return $id > 0 ? Kelurahan::query()->find($id) : null;
+    }
+
+    /**
+     * Mengelompokkan baris kebutuhan per pasien untuk modal rincian.
+     *
+     * Satu pasien bisa punya beberapa kebutuhan (mis. Kesehatan dan Pendidikan),
+     * jadi barisnya dikelompokkan per pasien dan daftar kebutuhannya dikirim
+     * sekaligus -- modal tidak perlu request lagi saat baris pasien dibuka.
+     */
+    private function patientSummary(Collection $kebutuhans): Collection
+    {
+        return $kebutuhans
+            ->groupBy('pasien_id')
+            ->map(function (Collection $items) {
+                $pasien = $items->first()->pasien;
+
+                return [
+                    'id'          => $pasien?->id,
+                    'name'        => $pasien?->name ?? '-',
+                    'nik'         => $pasien?->nik,
+                    'kebutuhans'  => $items->map(fn (PasienKebutuhan $item) => [
+                        'id'                  => $item->id,
+                        'jenis_kebutuhan'     => $item->jenisKebutuhan?->name ?? '-',
+                        'opd'                 => $item->opd?->name ?? '-',
+                        'jenis_penanganan'    => $item->jenisPenanganan?->name ?? '-',
+                        'status_key'          => $item->verification_status,
+                        'status'              => PasienKebutuhan::STATUS_LABELS[$item->verification_status] ?? $item->verification_status,
+                        'tindak_lanjut_count' => (int) $item->tindak_lanjuts_count,
+                        'url'                 => route('tindak-lanjut.show', $item->id),
+                    ])->values(),
+                ];
+            })
+            ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
+            ->values();
+    }
+
+    /**
+     * Payload JSON modal rincian. Bentuknya sama untuk semua tabel rekap supaya
+     * satu partial view bisa melayani semuanya.
+     */
+    private function detailResponse(string $title, ?string $filterLabel, Collection $kebutuhans)
+    {
+        return response()->json([
+            'title'        => $title,
+            'filter_label' => $filterLabel,
+            'patients'     => $this->patientSummary($kebutuhans),
         ]);
     }
 
@@ -149,21 +416,34 @@ class StatistikController extends Controller
     {
         $baseQuery = MobileAccessScope::scopeDashboard(PasienKebutuhan::query(), $request->user());
         $jenis = $this->jenisKebutuhanList();
+        [$kecamatanId, $kelurahanId] = $this->wilayahFilterIds($request);
 
-        $rows = $this->wilayahQuery($baseQuery)
+        $kecamatans = $this->wilayahFilterOptions($request->user());
+
+        // Sama seperti Rekap Wilayah: baris mengikuti filter yang aktif, dan
+        // kecamatan yang dipilih tetap tampil walau datanya kosong.
+        $rows = $this->applyWilayahFilter($this->wilayahQuery($baseQuery), $kecamatanId, $kelurahanId)
             ->selectRaw('pasiens.kecamatan_id as wilayah_id, ' . $this->kebutuhanColumns($jenis))
             ->groupBy('pasiens.kecamatan_id')
             ->get()
             ->keyBy('wilayah_id');
 
-        $names = $this->kecamatanNames($request->user(), $rows);
+        $names = $kecamatanId > 0
+            ? $kecamatans->only([$kecamatanId])
+            : $this->kecamatanNames($request->user(), $rows);
 
         return view('statistik.rekap-jenis-kebutuhan', [
             'jenisKebutuhans'  => $jenis,
             'kecamatanSummary' => $names
                 ->map(fn ($name, $id) => $this->rekapKebutuhanRow($rows->get($id), $name, $jenis, (int) $id))
                 ->values(),
-            'totals'           => $this->rekapKebutuhanTotals($this->wilayahQuery($baseQuery), $jenis),
+            'totals'           => $this->rekapKebutuhanTotals(
+                $this->applyWilayahFilter($this->wilayahQuery($baseQuery), $kecamatanId, $kelurahanId),
+                $jenis
+            ),
+            'filters'          => ['kecamatan_id' => $kecamatanId, 'kelurahan_id' => $kelurahanId],
+            'kecamatans'       => $kecamatans,
+            'kelurahans'       => $this->kelurahanOptions($request->user(), $kecamatans),
         ]);
     }
 
@@ -181,10 +461,14 @@ class StatistikController extends Controller
     {
         $baseQuery = MobileAccessScope::scopeDashboard(PasienKebutuhan::query(), $request->user());
         $jenis = $this->jenisKebutuhanList();
+        $kelurahanId = (int) $request->query('kelurahan_id', 0);
 
         $rows = $this->wilayahQuery($baseQuery)
             ->selectRaw('pasiens.kelurahan_id as wilayah_id, ' . $this->kebutuhanColumns($jenis))
             ->where('pasiens.kecamatan_id', $kecamatan->id)
+            // Filter kelurahan di tabel ikut berlaku di sini, sama seperti
+            // rekapKelurahan().
+            ->when($kelurahanId > 0, fn ($query) => $query->where('pasiens.kelurahan_id', $kelurahanId))
             ->groupBy('pasiens.kelurahan_id')
             ->get()
             ->keyBy('wilayah_id');
@@ -301,6 +585,89 @@ class StatistikController extends Controller
         }
 
         return $names->sort();
+    }
+
+    /**
+     * Filter wilayah yang diminta lewat query string: [kecamatan_id, kelurahan_id].
+     * Nilai 0 berarti filter itu tidak dipakai.
+     *
+     * Kelurahan yang dipilih tanpa kecamatan (mis. URL diketik tangan) tetap
+     * membawa kecamatannya: baris kecamatan itulah yang harus muncul di tabel,
+     * karena kelurahan tidak pernah ditampilkan sebagai baris induk. Kelurahan
+     * yang tidak ada, atau yang bukan milik kecamatan yang dipilih, diabaikan.
+     */
+    private function wilayahFilterIds(Request $request): array
+    {
+        $kecamatanId = (int) $request->query('kecamatan_id', 0);
+        $kelurahanId = (int) $request->query('kelurahan_id', 0);
+
+        if ($kelurahanId > 0) {
+            $kelurahan = Kelurahan::query()->find($kelurahanId);
+
+            if ($kelurahan === null || ($kecamatanId > 0 && $kecamatanId !== (int) $kelurahan->kecamatan_id)) {
+                $kelurahanId = 0;
+            } else {
+                $kecamatanId = (int) $kelurahan->kecamatan_id;
+            }
+        }
+
+        return [$kecamatanId, $kelurahanId];
+    }
+
+    /**
+     * Menerapkan filter wilayah ke query agregat (yang sudah di-join ke pasiens).
+     */
+    private function applyWilayahFilter($query, int $kecamatanId, int $kelurahanId)
+    {
+        return $query
+            ->when($kecamatanId > 0, fn ($q) => $q->where('pasiens.kecamatan_id', $kecamatanId))
+            ->when($kelurahanId > 0, fn ($q) => $q->where('pasiens.kelurahan_id', $kelurahanId));
+    }
+
+    /**
+     * Opsi filter kecamatan: seluruh master data, dibatasi untuk user yang
+     * ter-scope ke satu kecamatan/kelurahan supaya pilihannya tidak membuka
+     * wilayah di luar jangkauannya.
+     */
+    private function wilayahFilterOptions(User $user): Collection
+    {
+        $roles = collect(MobileAccessScope::roles($user));
+
+        $query = Kecamatan::query()->orderBy('name');
+
+        if ($roles->contains('kecamatan') && $user->kecamatan_id) {
+            $query->whereKey($user->kecamatan_id);
+        } elseif ($roles->contains('kelurahan') && $user->kelurahan_id) {
+            $query->whereKey(Kelurahan::query()->whereKey($user->kelurahan_id)->value('kecamatan_id'));
+        }
+
+        return $query->pluck('name', 'id');
+    }
+
+    /**
+     * Opsi filter kelurahan, dikelompokkan per kecamatan supaya form bisa
+     * merangkainya: kelurahan hanya muncul setelah kecamatannya dipilih.
+     */
+    private function kelurahanOptions(User $user, Collection $kecamatans): array
+    {
+        $roles = collect(MobileAccessScope::roles($user));
+
+        $query = Kelurahan::query()
+            ->whereIn('kecamatan_id', $kecamatans->keys()->all())
+            ->orderBy('name');
+
+        // User kelurahan hanya boleh memilih kelurahannya sendiri.
+        if ($roles->contains('kelurahan') && $user->kelurahan_id) {
+            $query->whereKey($user->kelurahan_id);
+        }
+
+        return $query->get(['id', 'name', 'kecamatan_id'])
+            ->groupBy('kecamatan_id')
+            ->map(fn (Collection $items) => $items
+                ->map(fn (Kelurahan $item) => ['id' => $item->id, 'name' => $item->name])
+                ->values()
+                ->all())
+            ->all();
     }
 
     /**

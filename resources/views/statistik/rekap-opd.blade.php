@@ -1,5 +1,16 @@
 @php
     $title = 'Rekap OPD';
+
+    // Pasangan kolom status dan nilai verification_status-nya. Dipakai untuk
+    // membuat angka di kolom itu bisa diklik dan membuka modal dengan filter
+    // status yang sama.
+    $statusColumns = [
+        'pending_count'         => 'pending',
+        'proses_count'          => 'proses',
+        'pending_bantuan_count' => 'pending_bantuan',
+        'tidak_layak_count'     => 'tidak_layak',
+        'selesai_count'         => 'selesai',
+    ];
 @endphp
 @extends('layouts.admin-blade')
 
@@ -37,13 +48,40 @@
                             <tbody class="divide-y divide-gray-100 bg-white">
                                 @forelse ($opdSummary as $row)
                                     <tr class="hover:bg-gray-50">
-                                        <td class="px-4 py-3 font-medium text-gray-900">{{ $row['name'] }}</td>
+                                        {{-- Nama OPD membuka modal berisi seluruh pasien OPD ini. --}}
+                                        <td class="px-4 py-3 font-medium text-gray-900">
+                                            <button
+                                                type="button"
+                                                data-no-unify
+                                                data-rekap-detail
+                                                data-rekap-name="{{ $row['name'] }}"
+                                                data-rekap-url="{{ route('rekap-opd.detail', $row['id']) }}"
+                                                class="inline-flex cursor-pointer items-center gap-2 text-left font-medium text-cyan-700 underline"
+                                            >
+                                                <span>{{ $row['name'] }}</span>
+                                            </button>
+                                        </td>
                                         <td class="px-4 py-3 text-center font-semibold text-gray-900">{{ $row['total_pasien'] }}</td>
-                                        <td class="px-4 py-3 text-center text-gray-700">{{ $row['pending_count'] }}</td>
-                                        <td class="px-4 py-3 text-center text-gray-700">{{ $row['proses_count'] }}</td>
-                                        <td class="px-4 py-3 text-center text-gray-700">{{ $row['pending_bantuan_count'] }}</td>
-                                        <td class="px-4 py-3 text-center text-gray-700">{{ $row['tidak_layak_count'] }}</td>
-                                        <td class="px-4 py-3 text-center text-gray-700">{{ $row['selesai_count'] }}</td>
+                                        @foreach ($statusColumns as $countKey => $statusKey)
+                                            <td class="px-4 py-3 text-center text-gray-700">
+                                                {{-- Angka 0 tidak perlu diklik: tidak ada pasien untuk ditampilkan. --}}
+                                                @if ($row[$countKey] > 0)
+                                                    <button
+                                                        type="button"
+                                                        data-no-unify
+                                                        data-rekap-detail
+                                                        data-rekap-name="{{ $row['name'] }}"
+                                                        data-rekap-url="{{ route('rekap-opd.detail', $row['id']) }}"
+                                                        data-filter-key="status"
+                                                        data-filter-value="{{ $statusKey }}"
+                                                        data-filter-label="Status: {{ $statusLabels[$statusKey] }}"
+                                                        class="cursor-pointer font-medium text-cyan-700 underline"
+                                                    >{{ $row[$countKey] }}</button>
+                                                @else
+                                                    {{ $row[$countKey] }}
+                                                @endif
+                                            </td>
+                                        @endforeach
                                     </tr>
                                 @empty
                                     <tr>
@@ -72,6 +110,9 @@
                     </div>
                 </div>
             </div>
+
+            {{-- Modal daftar pasien, dipakai bersama Rekap Wilayah. --}}
+            @include('statistik._rekap-detail')
         </div>
     </div>
 @endsection

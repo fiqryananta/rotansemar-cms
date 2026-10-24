@@ -1,5 +1,22 @@
 @php
     $title = 'Rekap Wilayah';
+
+    // Pasangan kolom status dan nilai verification_status-nya. Dipakai untuk
+    // membuat angka di kolom itu bisa diklik dan membuka modal dengan filter
+    // status yang sama.
+    $statusColumns = [
+        'pending_count'         => 'pending',
+        'proses_count'          => 'proses',
+        'pending_bantuan_count' => 'pending_bantuan',
+        'tidak_layak_count'     => 'tidak_layak',
+        'selesai_count'         => 'selesai',
+    ];
+
+    // Filter kelurahan yang sedang aktif ikut dibawa ke modal dan rincian
+    // kelurahan, supaya angkanya sama dengan baris yang diklik.
+    $filterQuery = (int) ($filters['kelurahan_id'] ?? 0) > 0
+        ? ['kelurahan_id' => (int) $filters['kelurahan_id']]
+        : [];
 @endphp
 @extends('layouts.admin-blade')
 
@@ -14,6 +31,11 @@
                     <h1 class="text-3xl font-bold text-gray-900">Rekap Wilayah</h1>
                 </div>
             </div>
+
+            {{-- Filter kecamatan dan kelurahan, langsung menyaring tabel di bawah. --}}
+            @include('statistik._wilayah-filter', [
+                'action' => route('rekap-wilayah.index'),
+            ])
 
             <div class="rounded-lg border border-gray-200 bg-white shadow-sm">
                 <div class="border-b border-gray-200 p-4">
@@ -38,17 +60,44 @@
                                 @forelse ($kecamatanSummary as $row)
                                     <tr class="cursor-pointer hover:bg-gray-50" data-kecamatan-id="{{ $row['id'] }}" data-loaded="0">
                                         <td class="px-4 py-3 font-medium text-gray-900">
-                                            <button type="button" class="inline-flex items-center gap-2 text-left font-medium text-gray-900" data-kecamatan-toggle aria-expanded="false">
-                                                <i class="ti ti-chevron-right text-gray-400 transition-transform duration-200" style="font-size:1rem;" data-chevron aria-hidden="true"></i>
-                                                <span>{{ $row['name'] }}</span>
-                                            </button>
+                                            <div class="flex items-center gap-2">
+                                                {{-- Chevron tetap membuka rincian kelurahan seperti sebelumnya. --}}
+                                                <button type="button" aria-label="Buka rincian kelurahan" data-kecamatan-toggle aria-expanded="false" class="inline-flex cursor-pointer items-center">
+                                                    <i class="ti ti-chevron-right text-gray-400 transition-transform duration-200" style="font-size:1rem;" data-chevron aria-hidden="true"></i>
+                                                </button>
+
+                                                {{-- Nama kecamatan membuka modal daftar pasien, sama seperti nama OPD di Rekap OPD. --}}
+                                                <button
+                                                    type="button"
+                                                    data-no-unify
+                                                    data-rekap-detail
+                                                    data-rekap-name="{{ $row['name'] }}"
+                                                    data-rekap-url="{{ route('rekap-wilayah.detail', [$row['id']] + $filterQuery) }}"
+                                                    class="cursor-pointer text-left font-medium text-cyan-700 underline"
+                                                >{{ $row['name'] }}</button>
+                                            </div>
                                         </td>
                                         <td class="px-4 py-3 text-center font-semibold text-gray-900">{{ $row['total_pasien'] }}</td>
-                                        <td class="px-4 py-3 text-center text-gray-700">{{ $row['pending_count'] }}</td>
-                                        <td class="px-4 py-3 text-center text-gray-700">{{ $row['proses_count'] }}</td>
-                                        <td class="px-4 py-3 text-center text-gray-700">{{ $row['pending_bantuan_count'] }}</td>
-                                        <td class="px-4 py-3 text-center text-gray-700">{{ $row['tidak_layak_count'] }}</td>
-                                        <td class="px-4 py-3 text-center text-gray-700">{{ $row['selesai_count'] }}</td>
+                                        @foreach ($statusColumns as $countKey => $statusKey)
+                                            <td class="px-4 py-3 text-center text-gray-700">
+                                                {{-- Angka 0 tidak perlu diklik: tidak ada pasien untuk ditampilkan. --}}
+                                                @if ($row[$countKey] > 0)
+                                                    <button
+                                                        type="button"
+                                                        data-no-unify
+                                                        data-rekap-detail
+                                                        data-rekap-name="{{ $row['name'] }}"
+                                                        data-rekap-url="{{ route('rekap-wilayah.detail', [$row['id']] + $filterQuery) }}"
+                                                        data-filter-key="status"
+                                                        data-filter-value="{{ $statusKey }}"
+                                                        data-filter-label="Status: {{ $statusLabels[$statusKey] }}"
+                                                        class="cursor-pointer font-medium text-cyan-700 underline"
+                                                    >{{ $row[$countKey] }}</button>
+                                                @else
+                                                    {{ $row[$countKey] }}
+                                                @endif
+                                            </td>
+                                        @endforeach
                                     </tr>
                                 @empty
                                     <tr>
@@ -74,13 +123,18 @@
                     </div>
                 </div>
             </div>
+
+            {{-- Modal daftar pasien, dipakai bersama Rekap OPD. --}}
+            @include('statistik._rekap-detail')
         </div>
     </div>
 @endsection
 
 @include('statistik._drilldown', [
     'tableId'    => 'rekap-wilayah',
-    'endpoint'   => route('rekap-wilayah.kelurahan', ['kecamatan' => '__ID__']),
+    // Filter kelurahan ikut dikirim supaya baris anak dan modalnya memakai
+    // himpunan data yang sama dengan baris induknya.
+    'endpoint'   => route('rekap-wilayah.kelurahan', ['kecamatan' => '__ID__'] + $filterQuery),
     'emptyText'  => 'Belum ada data kelurahan.',
     'columnKeys' => [
         'name',
@@ -91,4 +145,11 @@
         'tidak_layak_count',
         'selesai_count',
     ],
+    // Baris kelurahan ikut jadi pemicu modal, sama seperti baris kecamatan.
+    'detailUrl'      => route('rekap-wilayah.kelurahan-detail', ['kelurahan' => '__ID__'] + $filterQuery),
+    'filterColumns'  => collect($statusColumns)->map(fn ($statusKey) => [
+        'key'   => 'status',
+        'value' => $statusKey,
+        'label' => 'Status: ' . $statusLabels[$statusKey],
+    ])->all(),
 ])
