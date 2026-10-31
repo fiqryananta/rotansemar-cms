@@ -1,5 +1,12 @@
 @php
     $title = 'Pasien';
+
+    // Tombol disamakan dengan aturan di PasienController: permission menentukan
+    // akses, dan role Kecamatan selalu hanya boleh melihat.
+    $authUser = auth()->user();
+    $canCreate = $authUser?->can('pasiens.create') ?? false;
+    $canEdit = ($authUser?->can('pasiens.edit') ?? false) && ! $authUser?->isKecamatan();
+    $canDelete = ($authUser?->can('pasiens.delete') ?? false) && ! $authUser?->isKecamatan();
 @endphp
 @extends('layouts.admin-blade')
 
@@ -34,7 +41,9 @@
                             @if (auth()->user()?->hasRole('Admin'))
                                 <a href="{{ route('pasiens.import.index') }}" class="inline-flex h-10 items-center rounded-md border border-yellow-300 bg-yellow-50 px-4 text-sm font-medium text-yellow-700 transition hover:bg-yellow-100">Import Pasien</a>
                             @endif
-                            <a href="{{ route('pasiens.create') }}" class="inline-flex h-10 items-center rounded-md bg-gray-900 px-4 text-sm font-medium text-white transition hover:bg-gray-800">Tambah Pasien</a>
+                            @if ($canCreate)
+                                <a href="{{ route('pasiens.create') }}" class="inline-flex h-10 items-center rounded-md bg-gray-900 px-4 text-sm font-medium text-white transition hover:bg-gray-800">Tambah Pasien</a>
+                            @endif
                         </div>
                     </form>
                 </div>
@@ -64,12 +73,16 @@
                                         <td class="px-4 py-3 text-right">
                                             <div class="flex justify-end gap-2">
                                                 <a href="{{ route('pasiens.show', $item->id) }}" class="inline-flex h-9 items-center rounded-md border border-gray-300 bg-white px-3 text-sm font-medium text-gray-700 transition hover:bg-gray-50">Detail</a>
-                                                <a href="{{ route('pasiens.edit', $item->id) }}" class="inline-flex h-9 items-center rounded-md border border-gray-300 bg-white px-3 text-sm font-medium text-gray-700 transition hover:bg-gray-50">Edit</a>
-                                                <form method="POST" action="{{ route('pasiens.destroy', $item->id) }}" data-confirm="Hapus pasien {{ $item->name }}? Data yang dihapus tidak dapat dikembalikan.">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="inline-flex h-9 items-center rounded-md border border-red-200 bg-white px-3 text-sm font-medium text-red-600 transition hover:bg-red-50">Hapus</button>
-                                                </form>
+                                                @if ($canEdit)
+                                                    <a href="{{ route('pasiens.edit', $item->id) }}" class="inline-flex h-9 items-center rounded-md border border-gray-300 bg-white px-3 text-sm font-medium text-gray-700 transition hover:bg-gray-50">Edit</a>
+                                                @endif
+                                                @if ($canDelete)
+                                                    <form method="POST" action="{{ route('pasiens.destroy', $item->id) }}" data-confirm="Hapus pasien {{ $item->name }}? Data yang dihapus tidak dapat dikembalikan.">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="inline-flex h-9 items-center rounded-md border border-red-200 bg-white px-3 text-sm font-medium text-red-600 transition hover:bg-red-50">Hapus</button>
+                                                    </form>
+                                                @endif
                                             </div>
                                         </td>
                                     </tr>

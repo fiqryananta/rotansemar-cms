@@ -60,4 +60,17 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Kelurahan::class);
     }
+
+    /**
+     * Role Kecamatan hanya dipakai untuk memantau data pasien di wilayahnya:
+     * mengubah dan menghapus data pasien ditutup. Tombolnya disembunyikan di
+     * view dan rutenya ditolak walaupun permission pasiens.edit /
+     * pasiens.delete terpasang di role-nya.
+     */
+    public function isKecamatan(): bool
+    {
+        return $this->getRoleNames()
+            ->map(fn ($name) => strtolower((string) $name))
+            ->contains('kecamatan');
+    }
 }

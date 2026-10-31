@@ -1,5 +1,8 @@
 @php
     $title = 'Detail Pasien';
+
+    // Sama seperti daftar pasien: role Kecamatan hanya boleh melihat.
+    $canEdit = (auth()->user()?->can('pasiens.edit') ?? false) && ! auth()->user()?->isKecamatan();
 @endphp
 @extends('layouts.admin-blade')
 
@@ -18,7 +21,9 @@
 
                 <div class="flex gap-2">
                     <a href="{{ route('pasiens.index') }}" class="inline-flex h-10 items-center rounded-md border border-gray-300 bg-white px-4 text-sm font-medium text-gray-700 transition hover:bg-gray-50">Kembali</a>
-                    <a href="{{ route('pasiens.edit', $pasien->id) }}" class="inline-flex h-10 items-center rounded-md bg-cyan-600 px-4 text-sm font-medium text-white transition hover:bg-cyan-700">Edit Pasien</a>
+                    @if ($canEdit)
+                        <a href="{{ route('pasiens.edit', $pasien->id) }}" class="inline-flex h-10 items-center rounded-md bg-cyan-600 px-4 text-sm font-medium text-white transition hover:bg-cyan-700">Edit Pasien</a>
+                    @endif
                 </div>
             </div>
 

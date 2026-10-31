@@ -74,20 +74,13 @@ class PasienController extends Controller
         $payload = [
             'importSummary' => session('import_summary'),
             'importErrors' => session('import_errors', []),
-            'templateColumns' => [
-                'name',
-                'nik',
-                'birth_date',
-                'gender',
-                'faskes_id',
-                'puskesmas_id',
-                'kecamatan_id',
-                'kelurahan_id',
-                'address',
-                'coordinates',
-                'treatment_start_date',
-                'catatan_kebutuhan',
-            ],
+            'importFatal' => session('import_fatal'),
+            // Hanya kolom wajib yang ditampilkan; daftar lengkap 59 kolom ada di
+            // file template yang bisa diunduh dari halaman ini.
+            'templateColumns' => array_map(
+                fn (string $column) => $column === 'puskesmas_wilker' ? 'puskesmas wilker' : $column,
+                PasienImport::REQUIRED_COLUMNS
+            ),
         ];
 
         return view('pasiens.import', $payload);
@@ -111,9 +104,23 @@ class PasienController extends Controller
         $import = new PasienImport();
         Excel::import($import, $request->file('file'));
 
+        $summary = $import->summary();
+
+        // Kolom wajib tidak ada: seluruh file dibatalkan oleh importer. File
+        // yang hanya berisi baris header tidak pernah sampai ke importer sama
+        // sekali, jadi total 0 juga dianggap file kosong.
+        $fatal = $import->fatalError()
+            ?? ($summary['total'] === 0 ? 'File tidak berisi baris data. Isi template lalu unggah kembali.' : null);
+
+        if ($fatal !== null) {
+            return redirect()
+                ->route('pasiens.import.index')
+                ->with('import_fatal', $fatal);
+        }
+
         return redirect()
             ->route('pasiens.import.index')
-            ->with('import_summary', $import->summary())
+            ->with('import_summary', $summary)
             ->with('import_errors', $import->errors());
     }
 
@@ -137,6 +144,7 @@ class PasienController extends Controller
 
     public function edit(Request $request, Pasien $pasien)
     {
+        abort_if($request->user()->isKecamatan(), 403);
         abort_unless($this->canAccessPasien($request->user(), $pasien), 403);
 
         $pasien->load([
@@ -181,6 +189,7 @@ class PasienController extends Controller
 
     public function update(Request $request, Pasien $pasien)
     {
+        abort_if($request->user()->isKecamatan(), 403);
         abort_unless($this->canAccessPasien($request->user(), $pasien), 403);
 
         $validated = $this->validatePayload($request, $pasien);
@@ -201,6 +210,7 @@ class PasienController extends Controller
 
     public function destroy(Request $request, Pasien $pasien)
     {
+        abort_if($request->user()->isKecamatan(), 403);
         abort_unless($this->canAccessPasien($request->user(), $pasien), 403);
 
         $pasien->delete();

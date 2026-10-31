@@ -34,6 +34,13 @@
                         </div>
                     </form>
 
+                    @if (!empty($importFatal))
+                        <div class="mt-6 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+                            <p class="font-medium">Import dibatalkan</p>
+                            <p class="mt-1">{{ $importFatal }}</p>
+                        </div>
+                    @endif
+
                     @if (!empty($importSummary))
                         <div class="mt-6 rounded-md border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
                             <p class="font-medium">Ringkasan Import</p>
@@ -61,14 +68,18 @@
 
                 <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
                     <h2 class="mb-3 text-lg font-semibold text-gray-900">Format Template</h2>
-                    <p class="mb-3 text-sm text-gray-600">Gunakan nama kolom persis seperti berikut pada baris header:</p>
+                    <p class="mb-3 text-sm text-gray-600">Formatnya mengikuti template SemarBetul (59 kolom). Kolom yang wajib terisi:</p>
                     <ul class="space-y-2 text-sm text-gray-700">
                         @foreach ($templateColumns as $column)
                             <li class="rounded bg-gray-50 px-2 py-1 font-mono text-xs">{{ $column }}</li>
                         @endforeach
+                        <li class="rounded bg-gray-50 px-2 py-1 font-mono text-xs">age / birth_date</li>
                     </ul>
-                    <p class="mt-4 text-xs text-gray-500">Nilai gender harus salah satu: laki-laki atau perempuan.</p>
-                    <p class="mt-1 text-xs text-gray-500">Format tanggal: YYYY-MM-DD (contoh: 2026-05-10).</p>
+                    <p class="mt-4 text-xs text-gray-500">gender: L atau P.</p>
+                    <p class="mt-1 text-xs text-gray-500">Tanggal: format YYYY-MM-DD atau tanggal Excel.</p>
+                    <p class="mt-1 text-xs text-gray-500">Kolom Ya/Tidak diisi Ya atau Tidak.</p>
+                    <p class="mt-1 text-xs text-gray-500">faskes, puskesmas wilker, regency (kecamatan), village (kelurahan), pekerjaan, dan jenis diisi nama. Nama yang belum ada di master data akan dibuat otomatis.</p>
+                    <p class="mt-1 text-xs text-gray-500">Kolom lain di luar template diabaikan. Unduh template untuk melihat susunan kolom lengkap.</p>
                 </div>
             </div>
         </div>

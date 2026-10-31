@@ -17,9 +17,12 @@
             ['title' => 'Rekap Wilayah', 'href' => '/rekap-wilayah', 'permission' => 'statistik.view', 'active' => request()->is('rekap-wilayah*'), 'icon' => 'map-pin'],
             ['title' => 'Rekap Jenis Kebutuhan', 'href' => '/rekap-jenis-kebutuhan', 'permission' => 'statistik.view', 'active' => request()->is('rekap-jenis-kebutuhan*'), 'icon' => 'category'],
         ],
-        'Kegiatan' => [
-            ['title' => 'Kegiatan Penyuluhan', 'href' => '/kegiatan-penyuluhan', 'permission' => 'kegiatan-penyuluhan.view', 'active' => request()->is('kegiatan-penyuluhan*'), 'icon' => 'presentation'],
-        ],
+        // Menu Kegiatan Penyuluhan disembunyikan di versi web (modulnya dipakai
+        // aplikasi mobile). Rutenya tetap aktif; buka komentar di bawah ini
+        // kalau menunya ingin ditampilkan lagi.
+        // 'Kegiatan' => [
+        //     ['title' => 'Kegiatan Penyuluhan', 'href' => '/kegiatan-penyuluhan', 'permission' => 'kegiatan-penyuluhan.view', 'active' => request()->is('kegiatan-penyuluhan*'), 'icon' => 'presentation'],
+        // ],
         'Manajemen' => [
             ['title' => 'Users', 'href' => '/users', 'permission' => 'users.view', 'active' => request()->is('users*'), 'icon' => 'user-plus'],
             ['title' => 'Role', 'href' => '/roles', 'permission' => 'roles.view', 'active' => request()->is('roles*'), 'icon' => 'shield'],
